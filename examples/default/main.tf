@@ -54,14 +54,4 @@ module "test" {
   name                = "anf-account-001"
   location            = azapi_resource.rsg.location
   resource_group_name = azapi_resource.rsg.name
-  enable_telemetry = false
-  managed_identities = {
-    system_assigned = true
-  }
-  tags = {
-    environment = "example"
-  }
-  lock = {
-    kind = "CanNotDelete"
-  }
 }
