@@ -38,7 +38,7 @@ resource "random_pet" "name" {
 }
 
 resource "random_shuffle" "region" {
-  input = module.regions.valid_region_names
+  input        = module.regions.valid_region_names
   result_count = 1
 }
 ## End of section to provide a random Azure region for the resource group
@@ -47,9 +47,9 @@ resource "random_shuffle" "region" {
 
 # This is required for resource modules
 resource "azapi_resource" "rsg" {
-  type     = "Microsoft.Resources/resourceGroups@2021-04-01"
-  name     = "rsg-${module.regions.regions[random_integer.region_index.result].name}-anf-example-default-${random_pet.name.id}"
-  location = random_shuffle.region.result[0]
+  type                      = "Microsoft.Resources/resourceGroups@2021-04-01"
+  name                      = "rsg-${module.regions.regions[random_integer.region_index.result].name}-anf-example-default-cap-pool-${random_pet.name.id}"
+  location                  = random_shuffle.region.result[0]
   schema_validation_enabled = false
 
   body = {
@@ -64,7 +64,21 @@ resource "azapi_resource" "rsg" {
 module "test" {
   source = "../../"
 
-  name                = "anf-account-example-default-${random_pet.name.id}"
+  name                = "anf-account-example-default-cap-pool-${random_pet.name.id}"
   location            = azapi_resource.rsg.location
   resource_group_name = azapi_resource.rsg.name
+  capacity_pools = {
+    "pool1" = {
+      name          = "pool1"
+      size          = 4398046511104
+      service_level = "Premium"
+    }
+    "pool2" = {
+      name          = "pool2"
+      size          = 4398046511104
+      service_level = "Standard"
+      qos_type      = "Manual"
+      cool_access   = true
+    }
+  }
 }

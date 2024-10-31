@@ -172,3 +172,55 @@ variable "tags" {
   default     = null
   description = "(Optional) Tags of the resource."
 }
+
+# Capcity Pools
+
+variable "capacity_pools" {
+  type = map(object({
+    name            = optional(string)
+    cool_access     = optional(bool, false)
+    encryption_type = optional(string, "Single")
+    size            = optional(number)
+    qos_type        = optional(string, "Auto")
+    service_level   = optional(string)
+    tags            = optional(map(string), null)
+    timeouts = optional(object({
+      create = optional(string)
+      delete = optional(string)
+      read   = optional(string)
+      update = optional(string)
+    }))
+    role_assignments = optional(map(object({
+      role_definition_id_or_name             = string
+      principal_id                           = string
+      description                            = optional(string, null)
+      skip_service_principal_aad_check       = optional(bool, false)
+      condition                              = optional(string, null)
+      condition_version                      = optional(string, null)
+      delegated_managed_identity_resource_id = optional(string, null)
+      principal_type                         = optional(string, null)
+    })))
+  }))
+  default     = {}
+  description = <<DESCRIPTION
+(Optional) A map of capacity pools to create
+
+ - `cool_access` - (Optional) Specifies whether the volume is cool access enabled. Default is false.
+- `encryption_type` - (Optional) Specifies the encryption type of the volume.
+- `size` - (Optional) Specifies the size of the volume. Default is 4 TiB (4398046511104 bytes).
+- `qos_type` - (Optional) Specifies the QoS type of the volume. Default is 'Auto'
+- `service_level` - (Optional) Specifies the service level of the volume. Default is 'Premium'
+- `tags` - (Optional) Tags of the resource.
+- `timeouts` - (Optional) A `timeouts` block that allows you to specify timeouts for certain actions:
+  - `create` - (Defaults to 30 minutes) Used when creating the Capacity Pool.
+  - `delete` - (Defaults to 30 minutes) Used when deleting the Capacity Pool.
+  - `read` - (Defaults to 5 minutes) Used when retrieving the Capacity Pool.
+  - `update` - (Defaults to 30 minutes) Used when updating the Capacity Pool.
+- `role_assignments` - (Optional) A map of role assignments to create on this resource. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time. 
+DESCRIPTION
+
+  validation {
+    condition     = alltrue([for _, pool in var.capacity_pools : pool.size != null && pool.service_level != null])
+    error_message = "The size and service_level must be set for all capacity pools."
+  }
+}

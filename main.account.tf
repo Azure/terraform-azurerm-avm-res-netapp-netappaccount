@@ -6,6 +6,7 @@ resource "azapi_resource" "anf-account" {
   location  = var.location
   parent_id = "/subscriptions/${local.subscription_id}/resourceGroups/${var.resource_group_name}"
   tags      = var.tags
+
   dynamic "identity" {
     for_each = local.managed_identities.system_assigned_user_assigned
     content {
@@ -16,11 +17,12 @@ resource "azapi_resource" "anf-account" {
 
   body = {
     properties = {
-
       # activeDirectories = []
       # encryption = {}
     }
   }
+
+  schema_validation_enabled = false
 }
 
 resource "azapi_resource" "anf-account-lock" {
