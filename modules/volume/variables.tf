@@ -1,11 +1,11 @@
-variable "account" {
+variable "capacity_pool" {
   type = object({
     resource_id = string
   })
   description = <<DESCRIPTION
-  (Required) The Azure NetApp Files Account Resource ID, into which the capacity pool will be created.
+  (Required) The Azure NetApp Files Capacity Pool Resource ID, into which the Volume will be created.
 
-  - resource_id - The Azure NetApp Files Account Resource ID.
+  - resource_id - The Azure NetApp Files Capacity Pool Resource ID.
   DESCRIPTION
   nullable    = false
 }
@@ -54,11 +54,11 @@ variable "tags" {
 
 variable "name" {
   type        = string
-  description = "(Required) The name of the capacity pool."
+  description = "(Required) The name of the volume."
 
   validation {
-    condition     = can(regex("^[a-zA-Z0-9_-]{1,64}$", var.name))
-    error_message = "The NetApp Files Capacity Pool name must be be 1-64 characters in length and can only contain alphanumeric, hyphens and underscores."
+    condition     = can(regex("^[a-zA-Z0-9_-]{1,64}$", var.name) && var.name != "default" && var.name != "bin")
+    error_message = "The NetApp Files Volume name must be be 1-64 characters in length and can only contain alphanumeric, hyphens and underscores. The name cannot be `default` or `bin`."
   }
 }
 

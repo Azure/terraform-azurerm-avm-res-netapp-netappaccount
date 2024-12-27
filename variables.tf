@@ -279,3 +279,16 @@ The map key is deliberately arbitrary to avoid issues where map keys maybe unkno
 
 DESCRIPTION
 }
+
+variable "backup_vaults" {
+  type = map(object({
+    name = string
+    tags = optional(map(string), null)
+
+  }))
+  default     = {}
+  description = <<DESCRIPTION
+(Optional) A map of backup vaults to create on the ANF Account.
+
+DESCRIPTION
+}

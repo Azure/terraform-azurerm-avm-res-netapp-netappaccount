@@ -3,10 +3,8 @@ module "capacity-pools" {
 
   for_each = var.capacity_pools
 
-  account             = { resource_id = azapi_resource.anf-account.id }
-  resource_group_name = var.resource_group_name
-  subscription_id     = local.subscription_id
-  location            = var.location
+  account  = { resource_id = azapi_resource.anf-account.id }
+  location = var.location
 
   name            = each.value.name
   size            = each.value.size
