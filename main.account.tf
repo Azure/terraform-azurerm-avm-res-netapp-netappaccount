@@ -19,12 +19,28 @@ resource "azapi_resource" "anf-account" {
     properties = {
       activeDirectories = var.active_directories != null ? [
         for ad in var.active_directories : {
-          username      = ad.adds_admin_user_name
-          password      = ad.adds_admin_password
-          domain        = ad.adds_domain
-          dns           = ad.dns_servers
-          site          = ad.adds_site_name
-          smbServerName = ad.smb_server_name
+          username                = ad.adds_admin_user_name
+          password                = ad.adds_admin_password
+          domain                  = ad.adds_domain
+          dns                     = join(",", ad.dns_servers)
+          site                    = ad.adds_site_name
+          smbServerName           = ad.smb_server_name
+          organizationalUnit      = ad.adds_ou
+          administrators          = ad.administrators
+          backupOperators         = ad.backup_operators
+          securityOperators       = ad.security_operators
+          serverRootCACertificate = ad.server_root_ca_certificate
+          adName                  = ad.kerberos_ad_server_name
+          kdcIP                   = ad.kerberos_kdc_ip
+          ldapSearchScope = ad.ldap_search_scope != null ? {
+            userDN                = ad.ldap_search_scope.user_dn
+            groupDN               = ad.ldap_search_scope.group_dn
+            groupMembershipFilter = ad.ldap_search_scope.group_membership_filter
+          } : {}
+          allowLocalNfsUsersWithLdap = ad.local_nfs_users_with_ldap_allowed
+          aesEncryption              = ad.aes_encryption_enabled
+          ldapOverTLS                = ad.ldap_over_tls_enabled
+          ldapSigning                = ad.ldap_signing_enabled
         }
       ] : null
       # encryption = {}

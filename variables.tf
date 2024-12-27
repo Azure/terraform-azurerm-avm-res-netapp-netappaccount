@@ -226,12 +226,28 @@ DESCRIPTION
 
 variable "active_directories" {
   type = map(object({
-    adds_domain          = string
-    dns_servers          = set(string)
-    adds_site_name       = string
-    adds_admin_user_name = string
-    adds_admin_password  = string
-    smb_server_name      = string
+    adds_domain                       = string
+    dns_servers                       = set(string)
+    adds_site_name                    = string
+    adds_admin_user_name              = string
+    adds_admin_password               = string
+    smb_server_name                   = string
+    adds_ou                           = optional(string, "CN=Computers")
+    kerberos_ad_server_name           = optional(string)
+    kerberos_kdc_ip                   = optional(string)
+    aes_encryption_enabled            = optional(bool, false)
+    local_nfs_users_with_ldap_allowed = optional(bool, false)
+    ldap_over_tls_enabled             = optional(bool, false)
+    server_root_ca_certificate        = optional(string)
+    ldap_signing_enabled              = optional(bool, false)
+    administrators                    = optional(set(string))
+    backup_operators                  = optional(set(string))
+    security_operators                = optional(set(string))
+    ldap_search_scope = optional(object({
+      user_dn                 = string
+      group_dn                = string
+      group_membership_filter = optional(string)
+    }))
   }))
   default     = {}
   description = <<DESCRIPTION
@@ -245,6 +261,21 @@ The map key is deliberately arbitrary to avoid issues where map keys maybe unkno
 - `adds_admin_user_name` - The Active Directory Domain Services domain admin user name. Can be any user with sufficient permissions as per: https://learn.microsoft.com/azure/azure-netapp-files/create-active-directory-connections#requirements-for-active-directory-connections.
 - `adds_admin_password` - The Active Directory Domain Services domain admin password.
 - `smb_server_name` - NetBIOS name of the SMB server. This name will be registered as a computer account in the AD and used to mount volumes.
+- `adds_ou` - (Optional) LDAP Path for the Organization Unit where SMB Server machine accounts will be created (i.e. OU=SecondLevel,OU=FirstLevel). Default is `CN=Computers`.
+- `kerberos_ad_server_name` - (Optional) The name of the server that will be used for Kerberos authentication.
+- `kerberos_kdc_ip` - (Optional) The IP address of the Key Distribution Center for Kerberos authentication.
+- `aes_encryption_enabled` - (Optional) If enabled, AES encryption will be enabled for SMB communication. Default is `false`.
+- `local_nfs_users_with_ldap_allowed` - (Optional) If enabled, NFS client local users can also (in addition to LDAP users) access the NFS volumes. Default is `false`.
+- `ldap_over_tls_enabled` - (Optional) Specifies whether or not the LDAP traffic needs to be secured via TLS. Default is `false`.
+- `server_root_ca_certificate` - (Optional) When LDAP over SSL/TLS is enabled, the LDAP client is required to have base64 encoded Active Directory Certificate Service's self-signed root CA certificate, this optional parameter is used only for dual protocol with LDAP user-mapping volumes.
+- `ldap_signing_enabled` - (Optional) Specifies whether or not the LDAP traffic needs to be signed. Default is `false`.
+- `administrators` - (Optional) This option grants additional security privileges to AD DS domain users or groups that require elevated privileges to access the Azure NetApp Files volumes. The specified accounts will have elevated permissions at the file or folder level.
+- `backup_operators` - (Optional) This option grants addition security privileges to AD DS domain users or groups that require elevated backup privileges to support backup, restore, and migration workflows in Azure NetApp Files. The specified AD DS user accounts or groups will have elevated NTFS permissions at the file or folder level.
+- `security_operators` - (Optional) This option grants security privilege (SeSecurityPrivilege) to AD DS domain users or groups that require elevated privileges to access Azure NetApp Files volumes. The specified AD DS users or groups will be allowed to perform certain actions on SMB shares that require security privilege not assigned by default to domain users.
+- `ldap_search_scope` - (Optional) The LDAP search scope option optimizes Azure NetApp Files storage LDAP queries for use with large AD DS topologies and LDAP with extended groups or Unix security style with an Azure NetApp Files dual-protocol volume. The following properties can be specified:
+  - `user_dn` - This specifies the user DN, which overrides the base DN for user lookups.
+  - `group_dn` - This specifies the group DN, which overrides the base DN for group lookups.
+  - `group_membership_filter` - (Optional) This specifies the custom LDAP search filter to be used when looking up group membership from LDAP server
 
 DESCRIPTION
 }
