@@ -17,7 +17,16 @@ resource "azapi_resource" "anf-account" {
 
   body = {
     properties = {
-      # activeDirectories = []
+      activeDirectories = var.active_directories != null ? [
+        for ad in var.active_directories : {
+          username      = ad.adds_admin_user_name
+          password      = ad.adds_admin_password
+          domain        = ad.adds_domain
+          dns           = ad.dns_servers
+          site          = ad.adds_site_name
+          smbServerName = ad.smb_server_name
+        }
+      ] : null
       # encryption = {}
     }
   }

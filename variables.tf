@@ -223,3 +223,28 @@ DESCRIPTION
     error_message = "The size and service_level must be set for all capacity pools."
   }
 }
+
+variable "active_directories" {
+  type = map(object({
+    adds_domain          = string
+    dns_servers          = set(string)
+    adds_site_name       = string
+    adds_admin_user_name = string
+    adds_admin_password  = string
+    smb_server_name      = string
+  }))
+  default     = {}
+  description = <<DESCRIPTION
+(Optional) A map of Active Directory connections to create on the ANF Account.
+
+The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
+
+- `adds_domain` - The Active Directory Domain Services domain name.
+- `dns_servers` - The DNS servers to use to resolve the Active Directory Domain Services domain.
+- `adds_site_name` - The Active Directory site the service will limit Domain Controller discovery to.
+- `adds_admin_user_name` - The Active Directory Domain Services domain admin user name. Can be any user with sufficient permissions as per: https://learn.microsoft.com/azure/azure-netapp-files/create-active-directory-connections#requirements-for-active-directory-connections.
+- `adds_admin_password` - The Active Directory Domain Services domain admin password.
+- `smb_server_name` - NetBIOS name of the SMB server. This name will be registered as a computer account in the AD and used to mount volumes.
+
+DESCRIPTION
+}
