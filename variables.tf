@@ -173,8 +173,7 @@ variable "tags" {
   description = "(Optional) Tags of the resource."
 }
 
-# Capcity Pools
-
+# Capacity Pools
 variable "capacity_pools" {
   type = map(object({
     name            = optional(string)
@@ -205,7 +204,7 @@ variable "capacity_pools" {
   description = <<DESCRIPTION
 (Optional) A map of capacity pools to create
 
- - `cool_access` - (Optional) Specifies whether the volume is cool access enabled. Default is false.
+- `cool_access` - (Optional) Specifies whether the volume is cool access enabled. Default is false.
 - `encryption_type` - (Optional) Specifies the encryption type of the volume.
 - `size` - (Optional) Specifies the size of the volume. Default is 4 TiB (4398046511104 bytes).
 - `qos_type` - (Optional) Specifies the QoS type of the volume. Default is 'Auto'

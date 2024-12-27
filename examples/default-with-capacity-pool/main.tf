@@ -3,7 +3,7 @@ terraform {
   required_providers {
     azapi = {
       source  = "azure/azapi"
-      version = "~> 2.0"
+      version = "~> 2.1"
     }
     modtm = {
       source  = "azure/modtm"
@@ -25,6 +25,7 @@ module "regions" {
   source                    = "Azure/avm-utl-regions/azurerm"
   version                   = "~> 0.3"
   availability_zones_filter = true
+  geography_group_filter = "Europe"
 }
 
 # This allows us to randomize the region for the resource group.
@@ -47,8 +48,8 @@ resource "random_shuffle" "region" {
 
 # This is required for resource modules
 resource "azapi_resource" "rsg" {
-  type                      = "Microsoft.Resources/resourceGroups@2021-04-01"
-  name                      = "rsg-${module.regions.regions[random_integer.region_index.result].name}-anf-example-default-cap-pool-${random_pet.name.id}"
+  type                      = "Microsoft.Resources/resourceGroups@2024-03-01"
+  name                      = "rsg-${random_shuffle.region.result[0]}-anf-example-default-cap-pool-${random_pet.name.id}"
   location                  = random_shuffle.region.result[0]
   schema_validation_enabled = false
 

@@ -1,6 +1,6 @@
 resource "azapi_resource" "anf-capacity-pool" {
 
-  type      = "Microsoft.NetApp/netAppAccounts/capacityPools@2024-03-01"
+  type      = "Microsoft.NetApp/netAppAccounts/capacityPools@2024-07-01"
   parent_id = var.account.resource_id
   name      = var.name
   location  = var.location
@@ -15,4 +15,6 @@ resource "azapi_resource" "anf-capacity-pool" {
       encryptionType = var.encryption_type != null ? var.encryption_type : null
     }
   }
+
+  schema_validation_enabled = false
 }
