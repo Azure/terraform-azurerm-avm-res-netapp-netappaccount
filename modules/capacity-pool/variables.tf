@@ -15,12 +15,6 @@ variable "resource_group_name" {
   description = "The resource group where the resources will be deployed."
 }
 
-variable "subscription_id" {
-  type        = string
-  default     = null
-  description = "(Optional) Subscription ID passed in by an external process.  If this is not supplied, then the configuration either needs to include the subscription ID, or needs to be supplied properties to create the subscription."
-}
-
 variable "cool_access" {
   type        = bool
   default     = false
