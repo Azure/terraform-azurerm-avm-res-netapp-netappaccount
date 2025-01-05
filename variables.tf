@@ -23,7 +23,7 @@ variable "resource_group_name" {
 variable "subscription_id" {
   type        = string
   default     = null
-  description = "(Optional) Subscription ID passed in by an external process.  If this is not supplied, then the configuration either needs to include the subscription ID, or needs to be supplied properties to create the subscription."
+  description = "(Optional) Subscription ID passed in by an external process. If this is not supplied, then the configuration either needs to include the subscription ID, or needs to be supplied properties to create the subscription."
 }
 
 # required AVM interfaces
@@ -319,6 +319,63 @@ The map key is deliberately arbitrary to avoid issues where map keys maybe unkno
 - `daily_backups_to_keep` - (Optional) The number of daily backups to keep. Defaults to `2`.
 - `weekly_backups_to_keep` - (Optional) The number of weekly backups to keep. Defaults to `1`.
 - `monthly_backups_to_keep` - (Optional) The number of monthly backups to keep. Defaults to `1`.
+
+DESCRIPTION
+}
+
+variable "snapshot_policies" {
+  type = map(object({
+    name    = string
+    tags    = optional(map(string), null)
+    enabled = optional(bool, true)
+    hourly_schedule = optional(object({
+      snapshots_to_keep = number
+      minute            = number
+    }))
+    daily_schedule = optional(object({
+      snapshots_to_keep = number
+      hour              = number
+      minute            = number
+    }))
+    weekly_schedule = optional(object({
+      snapshots_to_keep = number
+      day               = list(string)
+      minute            = number
+      hour              = number
+    }))
+    monthly_schedule = optional(object({
+      snapshots_to_keep = number
+      days_of_month     = list(number)
+      hour              = number
+      minute            = number
+    }))
+  }))
+  default     = {}
+  description = <<DESCRIPTION
+(Optional) A map of snapshot policies to create on the ANF Account.
+
+The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
+
+- `name` - The name of the snapshot policy.
+- `tags` - (Optional) Tags of the resource.
+- `enabled` - (Optional) Whether the snapshot policy is enabled. Defaults to `true`.
+- `hourly_schedule` - (Optional) The hourly schedule for the snapshot policy. The following properties can be specified:
+  - `snapshots_to_keep` - The number of snapshots to keep. Must be between 0 and 255.
+  - `minute` - The minute of the hour to take the snapshot. Must be between 0 and 59.
+- `daily_schedule` - (Optional) The daily schedule for the snapshot policy. The following properties can be specified:
+  - `snapshots_to_keep` - The number of snapshots to keep. Must be between 0 and 255.
+  - `hour` - The hour of the day to take the snapshot. Must be between 0 and 23.
+  - `minute` - The minute of the hour to take the snapshot. Must be between 0 and 59.
+- `weekly_schedule` - (Optional) The weekly schedule for the snapshot policy. The following properties can be specified:
+  - `snapshots_to_keep` - The number of snapshots to keep. Must be between 0 and 255.
+  - `day` - A list of the days of the week to take the snapshot. Must use the following in the list: `Monday`, `Tuesday`, `Wednesday`, `Thursday`, `Friday`, `Saturday`, `Sunday`.
+  - `hour` - The hour of the day to take the snapshot. Must be between 0 and 23.
+  - `minute` - The minute of the hour to take the snapshot. Must be between 0 and 59.
+- `monthly_schedule` - (Optional) The monthly schedule for the snapshot policy. The following properties can be specified:
+  - `snapshots_to_keep` - The number of snapshots to keep. Must be between 0 and 255.
+  - `days_of_month` - A list of the days of the month to take the snapshot. Must be between 1 and 31.
+  - `hour` - The hour of the day to take the snapshot. Must be between 0 and 23.
+  - `minute` - The minute of the hour to take the snapshot. Must be between 0 and 59.
 
 DESCRIPTION
 }
