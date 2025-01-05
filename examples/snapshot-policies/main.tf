@@ -50,7 +50,7 @@ resource "random_shuffle" "region" {
 # This is required for resource modules
 resource "azapi_resource" "rsg" {
   type                      = "Microsoft.Resources/resourceGroups@2024-03-01"
-  name                      = "rsg-${random_shuffle.region.result[0]}-anf-example-backup-vlt-${random_pet.name.id}"
+  name                      = "rsg-${random_shuffle.region.result[0]}-anf-example-snapshot-pol-${random_pet.name.id}"
   location                  = random_shuffle.region.result[0]
   schema_validation_enabled = false
 
@@ -85,7 +85,7 @@ module "test" {
         minute            = 0
       }
       weekly_schedule = {
-        snapshots_to_keep = 4
+        snapshots_to_keep = 2
         day               = ["Monday", "Friday"]
         minute            = 0
         hour              = 0
