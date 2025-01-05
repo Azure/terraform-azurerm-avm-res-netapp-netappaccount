@@ -290,5 +290,35 @@ variable "backup_vaults" {
   description = <<DESCRIPTION
 (Optional) A map of backup vaults to create on the ANF Account.
 
+The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
+
+- `name` - The name of the backup vault.
+- `tags` - (Optional) Tags of the resource.
+
+DESCRIPTION
+}
+
+variable "backup_policies" {
+  type = map(object({
+    name                    = string
+    tags                    = optional(map(string), null)
+    enabled                 = optional(bool, true)
+    daily_backups_to_keep   = optional(number, 2)
+    weekly_backups_to_keep  = optional(number, 1)
+    monthly_backups_to_keep = optional(number, 1)
+  }))
+  default     = {}
+  description = <<DESCRIPTION
+(Optional) A map of backup policies to create on the ANF Account.
+
+The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
+
+- `name` - The name of the backup policy.
+- `tags` - (Optional) Tags of the resource.
+- `enabled` - (Optional) Whether the backup policy is enabled. Defaults to `true`.
+- `daily_backups_to_keep` - (Optional) The number of daily backups to keep. Defaults to `2`.
+- `weekly_backups_to_keep` - (Optional) The number of weekly backups to keep. Defaults to `1`.
+- `monthly_backups_to_keep` - (Optional) The number of monthly backups to keep. Defaults to `1`.
+
 DESCRIPTION
 }

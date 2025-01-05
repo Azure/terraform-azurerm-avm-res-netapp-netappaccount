@@ -3,7 +3,7 @@ variable "account" {
     resource_id = string
   })
   description = <<DESCRIPTION
-  (Required) The Azure NetApp Files Account Resource ID, into which the capacity pool will be created.
+  (Required) The Azure NetApp Files Account Resource ID, into which the Backup Vault will be created.
 
   - resource_id - The Azure NetApp Files Account Resource ID.
   DESCRIPTION

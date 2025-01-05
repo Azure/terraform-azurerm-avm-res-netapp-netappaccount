@@ -83,4 +83,23 @@ module "test" {
       }
     }
   }
+  backup_policies = {
+    "backup-policy-1" = {
+      name = "backup-policy-1"
+      tags = {
+        environment   = "prod"
+        configuration = "defaults"
+      }
+    }
+    "backup-policy-2" = {
+      name = "backup-policy-2"
+      tags = {
+        environment   = "test"
+        configuration = "custom"
+      }
+      daily_backups_to_keep   = 7
+      weekly_backups_to_keep  = 4
+      monthly_backups_to_keep = 6
+    }
+  }
 }
