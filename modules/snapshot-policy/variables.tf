@@ -73,7 +73,7 @@ variable "daily_schedule" {
 variable "weekly_schedule" {
   type = object({
     snapshots_to_keep = number
-    day               = list(string)
+    day               = set(string)
     hour              = number
     minute            = number
   })
@@ -93,7 +93,7 @@ variable "weekly_schedule" {
 variable "monthly_schedule" {
   type = object({
     snapshots_to_keep = number
-    days_of_month     = list(number)
+    days_of_month     = set(number)
     hour              = number
     minute            = number
   })

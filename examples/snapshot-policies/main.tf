@@ -106,6 +106,12 @@ module "test" {
         snapshots_to_keep = 8
         minute            = 0
       }
+      weekly_schedule = {
+        snapshots_to_keep = 2
+        day               = ["Monday", "Friday"]
+        minute            = 0
+        hour              = 0
+      }
     }
   }
 }

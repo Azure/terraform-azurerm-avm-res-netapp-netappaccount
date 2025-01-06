@@ -339,13 +339,13 @@ variable "snapshot_policies" {
     }))
     weekly_schedule = optional(object({
       snapshots_to_keep = number
-      day               = list(string)
+      day               = set(string)
       minute            = number
       hour              = number
     }))
     monthly_schedule = optional(object({
       snapshots_to_keep = number
-      days_of_month     = list(number)
+      days_of_month     = set(number)
       hour              = number
       minute            = number
     }))
