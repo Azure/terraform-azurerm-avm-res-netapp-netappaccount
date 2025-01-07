@@ -30,7 +30,7 @@ resource "azapi_resource" "anf-snapshot-policy" {
 
       weeklySchedule = var.weekly_schedule != null ? {
         snapshotsToKeep = var.weekly_schedule.snapshots_to_keep
-        day             = jsondecode(jsonencode(join(",", var.weekly_schedule.day)))
+        day             = local.weekly_schedule_day
         minute          = var.weekly_schedule.minute
         hour            = var.weekly_schedule.hour
         } : {
@@ -42,7 +42,7 @@ resource "azapi_resource" "anf-snapshot-policy" {
 
       monthlySchedule = var.monthly_schedule != null ? {
         snapshotsToKeep = var.monthly_schedule.snapshots_to_keep
-        daysOfMonth     = jsondecode(jsonencode(join(",", var.monthly_schedule.days_of_month)))
+        daysOfMonth     = local.monthly_schedule_days_of_month
         hour            = var.monthly_schedule.hour
         minute          = var.monthly_schedule.minute
         } : {
