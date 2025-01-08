@@ -1,3 +1,9 @@
+variable "avs_data_store" {
+  type        = bool
+  default     = false
+  description = "(Optional) Specifies whether the volume is enabled for Azure VMware Solution (AVS) datastore purposes. Default is `false`."
+}
+
 variable "capacity_pool" {
   type = object({
     resource_id = string
@@ -13,7 +19,30 @@ variable "capacity_pool" {
 variable "cool_access" {
   type        = bool
   default     = false
-  description = "(Optional) Specifies whether the volume is cool access enabled. Default is false."
+  description = "(Optional) Specifies whether the volume is cool access enabled. Default is `false`."
+}
+
+variable "cool_access_retrieval_policy" {
+  type        = string
+  description = "(Optional) determines the data retrieval behavior from the cool tier to standard storage based on the read pattern for cool access enabled volumes. Possible values are `Default`, `Never`, `OnRead` or `null`. Default is `null`."
+  default     = null
+
+  validation {
+    condition     = can(regex("^(Default|Never|OnRead|null)$", var.cool_access_retrieval_policy))
+    error_message = "The cool_access_retrieval_policy value must be either Default, Never, OnRead or null."
+  }
+}
+
+variable "coolness_period" {
+  type        = number
+  description = "(Optional) Specifies the number of days after which data that is not accessed by clients will be tiered. Values must be between 2 and 183. Default is null."
+  default     = null
+
+  validation {
+    condition     = var.coolness_period == null || (var.coolness_period >= 2 && var.coolness_period <= 183)
+    error_message = "The coolness_period value must be between 2 and 183 or null."
+  }
+  
 }
 
 variable "encryption_type" {
@@ -88,5 +117,14 @@ variable "service_level" {
   }
 }
 
+variable "zone" {
+  type        = number
+  description = "(Optional) The number of the availability zone where the volume should be created."
+  default     = null
 
+  validation {
+    condition     = can(regex("^(1|2|3)$", var.zone))
+    error_message = "The NetApp Files Volume zone must be either 1, 2 or 3."
+  }
+}
 
