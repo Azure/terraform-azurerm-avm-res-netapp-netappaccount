@@ -25,7 +25,6 @@ variable "encryption_type" {
     condition     = can(regex("^(Single|Double)$", var.encryption_type))
     error_message = "The encryption_type value must be either Single or Double."
   }
-
 }
 
 variable "qos_type" {
@@ -37,7 +36,6 @@ variable "qos_type" {
     condition     = can(regex("^(Auto|Manual)$", var.qos_type))
     error_message = "The qos_type value must be either Auto or Manual."
   }
-
 }
 
 variable "location" {
@@ -79,8 +77,8 @@ variable "size" {
 
 variable "service_level" {
   type        = string
-  description = "(Optional) The service level of the capacity pool. Defaults to 'Premium'."
-  default     = "Premium"
+  description = "(Optional) The service level of the capacity pool. Defaults to 'Standard'."
+  default     = "Standard"
 
   validation {
     condition     = can(regex("^(Standard|Premium|Ultra)$", var.service_level))

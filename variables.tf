@@ -379,3 +379,15 @@ The map key is deliberately arbitrary to avoid issues where map keys maybe unkno
 
 DESCRIPTION
 }
+
+variable "volumes" {
+  type = map(object({
+    name    = string
+    tags    = optional(map(string), null)
+    capacity_pool_map_key = string
+    
+  }))
+    
+
+  
+}

@@ -10,7 +10,6 @@ resource "azapi_resource" "anf-capacity-pool-volume" {
     zones = var.zone
     properties = {
       avsDataStore                      = local.avs_data_store
-      backupId                          = TBC
       coolAccess                        = var.cool_access
       coolAccessRetrievalPolicy         = var.cool_access_retrieval_policy
       coolnessPeriod                    = var.coolness_period
@@ -27,80 +26,62 @@ resource "azapi_resource" "anf-capacity-pool-volume" {
       ldapEnabled                       = var.ldap_enabled
       networkFeatures                   = var.network_features
       protocolTypes                     = var.protocol_types
-      proximityPlacementGroup           =
-      securityStyle                     =
-      serviceLevel                      =
-      smbAccessBasedEnumeration         =
-      smbContinuouslyAvailable          =
-      smbEncryption                     =
-      smbNonBrowsable                   =
-      snapshotDirectoryVisible          =
-      snapshotId                        =
-      subnetId                          =
-      throughputMibps                   =
-      unixPermissions                   =
-      usageThreshold                    =
-      volumeSpecName                    =
-      volumeType                        =
+      proximityPlacementGroup           = var.proximity_placement_group_resource_id
+      securityStyle                     = local.security_style
+      serviceLevel                      = var.service_level
+      smbAccessBasedEnumeration         = local.smb_access_based_enumeration_enabled
+      smbContinuouslyAvailable          = var.smb_continuously_available
+      smbEncryption                     = var.smb_encryption
+      smbNonBrowsable                   = local.smb_non_browsable
+      snapshotDirectoryVisible          = var.snapshot_directory_visible
+      subnetId                          = var.subnet_resource_id
+      throughputMibps                   = var.throughput_mibps
+      unixPermissions                   = var.unix_permissions
+      usageThreshold                    = local.volume_size_in_bytes
+      volumeSpecName                    = var.volume_spec_name
+      volumeType                        = var.volume_type
 
       dataProtection = {
-        backup = {
-          backupPolicyId =
-          backupVaultId  =
-          policyEnforced =
-        }
-        replication = {
-          endpointType           = 
-          remoteVolumeRegion     = 
-          remoteVolumeResourceId = 
-          replicationSchedule    = 
-          remotePath = {
-            externalHostName = 
-            serverName       = 
-            volumeName       = 
-          }
-        }
-        snapshot = {
-          snapshotPolicyId =
-        }
-        volumeRelocation = {
-          relocationRequested = 
-        }
+        backup = var.backup_policy_resource_id != null && var.backup_vault_resource_id != null ? {
+          backupPolicyId = var.backup_policy_resource_id
+          backupVaultId  = var.backup_vault_resource_id
+          policyEnforced = var.backup_policy_enforced
+        } : null
+        # To be added in future requires some POST operations via azapi_resource_action
+        # replication = {
+        #   endpointType           = 
+        #   remoteVolumeRegion     = 
+        #   remoteVolumeResourceId = 
+        #   replicationSchedule    = 
+        #   remotePath = {
+        #     externalHostName = 
+        #     serverName       = 
+        #     volumeName       = 
+        #   }
+        # }
+        snapshot = var.snapshot_policy_resource_id != null ? {
+          snapshotPolicyId = var.snapshot_policy_resource_id
+        } : null
       }
     }
 
     exportPolicy = {
-      rules = {
-        allowedClients      =
-        chownMode           =
-        cifs                =
-        hasRootAccess       =
-        kerberos5ReadOnly   =
-        kerberos5ReadWrite  =
-        kerberos5iReadOnly  =
-        kerberos5iReadWrite =
-        kerberos5pReadOnly  =
-        kerberos5pReadWrite =
-        nfsv3               =
-        nfsv41              =
-        ruleIndex           =
-        unixReadOnly        =
-        unixReadWrite       =
-      }
+      rules = local.export_policy_rules
     }
 
-      placementRules = {
-        key   =
-        value =
+    placementRules = length(var.placement_rules) > 0 ? [
+      for rule in var.placement_rules : {
+        key   = rule.key
+        value = rule.value
       }
-    
+    ] : null
+
   }
 
   schema_validation_enabled = false
 
-  # Might want to add this in to be a fail safe for accidental deletion
-  # lifecycle {
-  #   prevent_destroy = var.prevent_destroy
-  # }
+  lifecycle {
+    prevent_destroy = var.prevent_destroy
+  }
 
 }

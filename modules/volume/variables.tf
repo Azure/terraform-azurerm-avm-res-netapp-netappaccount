@@ -4,6 +4,34 @@ variable "avs_data_store" {
   description = "(Optional) Specifies whether the volume is enabled for Azure VMware Solution (AVS) datastore purposes. Default is `false`."
 }
 
+variable "backup_policy_resource_id" {
+  type        = string
+  description = "(Optional) The Azure Resource ID of the Backup Policy to associate with the volume. Default is `null`."
+  default     = null
+
+  validation {
+    condition     = var.backup_policy_resource_id == null || can(regex("^/subscriptions/[^/]+/resourceGroups/[^/]+/providers/Microsoft.NetApp/netAppAccounts/[^/]+/backupPolicies/[^/]+$", var.backup_policy_resource_id))
+    error_message = "The `backup_policy_resource_id` must be set and it must also be a valid Azure Resource ID or `null`."
+  }
+}
+
+variable "backup_vault_resource_id" {
+  type        = string
+  description = "(Optional) The Azure Resource ID of the Backup Vault to associate with the volume. Default is `null`."
+  default     = null
+
+  validation {
+    condition     = var.backup_vault_resource_id == null || can(regex("^/subscriptions/[^/]+/resourceGroups/[^/]+/providers/Microsoft.NetApp/netAppAccounts/[^/]+/backupVaults/[^/]+$", var.backup_vault_resource_id))
+    error_message = "The `backup_vault_resource_id` must be set and it must also be a valid Azure Resource ID or `null`."
+  }
+}
+
+variable "backup_policy_enforced" {
+  type        = bool
+  default     = false
+  description = "(Optional) Specifies whether the backup policy is enforced for the volume. Default is `false`."
+}
+
 variable "capacity_pool" {
   type = object({
     resource_id = string
@@ -102,14 +130,68 @@ variable "encryption_key_source" {
   }
 }
 
+variable "export_policy_rules" {
+  type = map(object({
+    rule_index      = number
+    allowed_clients = list(string)
+    chown_mode      = optional(string)
+    cifs            = optional(bool)
+    ntfsv3          = optional(bool)
+    ntfsv41         = optional(bool)
+    has_root_access = optional(bool)
+    kerberos5i_ro   = optional(bool)
+    kerberos5i_rw   = optional(bool)
+    kerberos5p_ro   = optional(bool)
+    kerberos5p_rw   = optional(bool)
+    kerberos5_ro    = optional(bool)
+    kerberos5_rw    = optional(bool)
+    unix_ro         = optional(bool)
+    unix_rw         = optional(bool)
+  }))
+  default = {}
+
+  # the allowed_clients list must contain either IP addresses or CIDR ranges
+  validation {
+    condition     = alltrue([for rule in var.export_policy_rules : alltrue([for client in rule.allowed_clients : can(regex("^(?:[0-9]{1,3}\.){3}[0-9]{1,3}(?:\/[0-9]{1,2})?$", client))])])
+    error_message = "The `allowed_clients` list must contain either IP addresses or CIDR ranges."
+  }
+  validation {
+    condition     = alltrue([for rule in var.export_policy_rules : can(regex("^(Restricted|Unrestricted)$", rule.chown_mode))])
+    error_message = "The `chown_mode` value must be either `Restricted` or `Unrestricted`."
+  }
+
+  description = <<DESCRIPTION
+  (Optional) A map of export policy rules for the volume. Default is `{}`.
+
+  > The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
+
+  - rule_index      - The index of the rule.
+  - allowed_clients - The list of allowed clients. Must be IP addresses or CIDR ranges.
+  - chown_mode      - (Optional) The chown mode of the rule. Possible values are `Restricted` or `Unrestricted`. This variable specifies who is authorized to change the ownership of a file. `Restricted` - Only root user can change the ownership of the file. `Unrestricted` - Non-root users can change ownership of files that they own.
+  - cifs            - (Optional) Specifies whether CIFS protocol is allowed.
+  - ntfsv3          - (Optional) Specifies whether NFSv3 protocol is allowed. Enable only for NFSv3 type volumes.
+  - ntfsv41         - (Optional) Specifies whether NFSv4.1 protocol is allowed. Enable only for NFSv4.1 type volumes.
+  - has_root_access - (Optional) Specifies whether root access is allowed.
+  - kerberos5i_ro   - (Optional) Specifies whether Kerberos 5i read-only is allowed.
+  - kerberos5i_rw   - (Optional) Specifies whether Kerberos 5i read-write is allowed.
+  - kerberos5p_ro   - (Optional) Specifies whether Kerberos 5p read-only is allowed.
+  - kerberos5p_rw   - (Optional) Specifies whether Kerberos 5p read-write is allowed.
+  - kerberos5_ro    - (Optional) Specifies whether Kerberos 5 read-only is allowed.
+  - kerberos5_rw    - (Optional) Specifies whether Kerberos 5 read-write is allowed.
+  - unix_ro         - (Optional) Specifies whether UNIX read-only is allowed.
+  - unix_rw         - (Optional) Specifies whether UNIX read-write is allowed.
+
+  DESCRIPTION
+}
+
 variable "key_vault_private_endpoint_resource_id" {
   type        = string
   description = "(Optional) The Azure Resource ID of the Private Endpoint to access the required Key Vault. Required if `encryption_key_source` is set to `Microsoft.KeyVault`. Default is `null`. Example: `/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg1/providers/Microsoft.Network/privateEndpoints/pep-kvlt-001`."
   default     = null
 
   validation {
-    condition     = var.encryption_key_source == "Microsoft.NetApp" && var.key_vault_private_endpoint_resource_id != null
-    error_message = "The `key_vault_private_endpoint_resource_id` must be set if encryption_key_source is set to `Microsoft.KeyVault`."
+    condition     = var.encryption_key_source == "Microsoft.NetApp" && var.key_vault_private_endpoint_resource_id != null && can(regex("^/subscriptions/[^/]+/resourceGroups/[^/]+/providers/Microsoft.Network/privateEndpoints/[^/]+$", var.key_vault_private_endpoint_resource_id))
+    error_message = "The `key_vault_private_endpoint_resource_id` must be set if encryption_key_source is set to `Microsoft.KeyVault`. It must also be a valid Azure Resource ID."
   }
 }
 
@@ -127,48 +209,203 @@ variable "encryption_type" {
 variable "is_large_volume" {
   type        = bool
   default     = false
-  description = "(Optional) Specifies whether the volume is a large volume. Default is `false`."  
+  description = "(Optional) Specifies whether the volume is a large volume. Default is `false`."
 }
 
 variable "kerberos_enabled" {
   type        = bool
   default     = false
-  description = "(Optional) Specifies whether the volume is Kerberos enabled. Default is `false`."  
+  description = "(Optional) Specifies whether the volume is Kerberos enabled. Default is `false`."
 }
 
 variable "ldap_enabled" {
   type        = bool
   default     = false
-  description = "(Optional) Specifies whether the volume is LDAP enabled. Default is `false`."  
+  description = "(Optional) Specifies whether the volume is LDAP enabled. Default is `false`."
 }
 
 variable "network_features" {
-  type = string
+  type        = string
   description = "(Optional) Specifies the network features of the volume Possible values are: `Basic` or `Standard`. Default is `Standard`."
   default     = "Standard"
 
   validation {
     condition     = can(regex("^(Basic|Standard)$", var.network_features))
     error_message = "The network_features value must be either Basic or Standard."
-  } 
+  }
+}
+
+variable "placement_rules" {
+  type = map(object({
+    key   = optional(string)
+    value = optional(string)
+  }))
+  description = <<DESCRIPTION
+  (Optional) A map of placement rule objects for the volume. Default is `{}`."
+
+  > The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
+
+  - key   - The key of the placement rule.
+  - value - The value of the placement rule.
+
+  DESCRIPTION
+  default     = {}
 }
 
 variable "protocol_types" {
   type        = list(string)
-  description = "(Optional) The list of protocol types for the volume. Possible values are `NFSv3`, `NFSv4.1`, `CIFS`. Default is `NFSv3`."
-  default     = ["NFSv3"]  
-}
-
-variable "qos_type" {
-  type        = string
-  description = "(Optional) Specifies the QoS type of the volume."
-  default     = "Auto"
+  description = "(Optional) The list of protocol types for the volume. Possible values are `nfsv3`, `nfsv4.1`, `cifs`. Default is `nfsv3`."
+  default     = ["NFSv3"]
 
   validation {
-    condition     = can(regex("^(Auto|Manual)$", var.qos_type))
-    error_message = "The qos_type value must be either Auto or Manual."
+    condition     = alltrue([for protocol in var.protocol_types : can(regex("^(nfsv3|nfsv4.1|cifs)$", protocol))])
+    error_message = "The `protocol_types` value must be a list containing values of: `nfsv3`, `nfsv4.1`, `cifs`."
   }
+}
 
+variable "proximity_placement_group_resource_id" {
+  type        = string
+  description = "(Optional) The resource ID of the Proximity Placement Group the volume should be placed in."
+  default     = null
+
+  validation {
+    condition     = can(regex("^/subscriptions/[^/]+/resourceGroups/[^/]+/providers/Microsoft.Compute/proximityPlacementGroups/[^/]+$", var.proximity_placement_group_resource_id))
+    error_message = "The `proximity_placement_group_resource_id` must be a valid Azure Resource ID."
+  }
+}
+
+variable "security_style" {
+  type        = string
+  description = "(Optional) The security style of the volume. Possible values are `ntfs` or `unix`. Defaults to `unix` for NFS volumes or `ntfs` for CIFS and dual protocol volumes."
+  default     = "unix"
+
+  validation {
+    condition     = can(regex("^(ntfs|unix)$", var.security_style))
+    error_message = "The `security_style` value must be either `ntfs` or `unix`."
+  }
+}
+
+variable "service_level" {
+  type        = string
+  description = "(Optional) The service level of the volume. Defaults to `Standard`."
+  default     = "Standard"
+
+  validation {
+    condition     = can(regex("^(Standard|Premium|Ultra)$", var.service_level))
+    error_message = "The service_level value must be either `Standard`, `Premium` or `Ultra`."
+  }
+}
+
+variable "smb_access_based_enumeration_enabled" {
+  type        = bool
+  default     = false
+  description = "(Optional) Specifies whether SMB access-based enumeration is enabled. Only support on SMB or dual protocol volumes. Default is `false`."
+}
+
+variable "smb_continuously_available" {
+  type        = bool
+  default     = false
+  description = "(Optional) Specifies whether the volume is continuously available. Only supported on SMB volumes. Default is `false`."
+}
+
+variable "smb_encryption" {
+  type        = bool
+  default     = false
+  description = "(Optional) Enables encryption for in-flight smb3 data. Only support on SMB or dual protocol volumes. Default is `false`."
+}
+
+variable "smb_non_browsable" {
+  type        = bool
+  default     = false
+  description = "(Optional) Enables non-browsable property for SMB Shares. Only support on SMB or dual protocol volumes. Default is `false`."
+}
+
+variable "snapshot_directory_visible" {
+  type        = bool
+  default     = true
+  description = "(Optional) If enabled (`true`) the volume will contain a read-only snapshot directory which provides access to each of the volume's snapshots. Default is `true`."
+}
+
+variable "snapshot_policy_resource_id" {
+  type        = string
+  description = "(Optional) The Azure Resource ID of the Snapshot Policy to associate with the volume. Default is `null`."
+  default     = null
+
+  validation {
+    condition     = var.snapshot_policy_resource_id == null || can(regex("^/subscriptions/[^/]+/resourceGroups/[^/]+/providers/Microsoft.NetApp/netAppAccounts/[^/]+/snapshotPolicies/[^/]+$", var.snapshot_policy_resource_id))
+    error_message = "The `snapshot_policy_resource_id` must be set and it must also be a valid Azure Resource ID or `null`."
+  }
+}
+
+variable "subnet_resource_id" {
+  type        = string
+  description = "(Optional) The Azure Resource ID of the Subnet where the volume should be placed. Subnet must have the delegation `Microsoft.NetApp/volumes`."
+
+  validation {
+    condition     = can(regex("^/subscriptions/[^/]+/resourceGroups/[^/]+/providers/Microsoft.Network/virtualNetworks/[^/]+/subnets/[^/]+$", var.subnet_resource_id))
+    error_message = "The `subnet_resource_id` must be set and it must also be a valid Azure Resource ID."
+  }
+}
+
+variable "throughput_mibps" {
+  type        = number
+  description = "(Optional) Maximum throughput in MiB/s that can be achieved by this volume and this will be accepted as input only for manual qosType volume. Default is `null`."
+  default     = null
+}
+
+variable "unix_permissions" {
+  type        = string
+  description = <<DESCRIPTION
+  UNIX permissions for NFS volume accepted in octal 4 digit format.
+  
+  First digit selects the set user ID(4), set group ID (2) and sticky (1) attributes.
+  
+  Second digit selects permission for the owner of the file: read (4), write (2) and execute (1). 
+  
+  Third selects permissions for other users in the same group. 
+  
+  The fourth for other users not in the group. 
+  
+  `0755` - gives read/write/execute permissions to owner and read/execute to group and other users.
+
+  For more information, see https://learn.microsoft.com/azure/azure-netapp-files/configure-unix-permissions-change-ownership-mode and https://wikipedia.org/wiki/File-system_permissions#Numeric_notation
+
+  Default is `0770`.
+  DESCRIPTION
+  default     = "0770"
+
+  validation {
+    condition     = can(regex("^[0-7]{4}$", var.unix_permissions))
+    error_message = "The `unix_permissions` value must be a 4-digit octal number."
+  }
+}
+
+variable "volume_size_in_gib" {
+  type        = number
+  description = "(Optional) The size of the volume in Gibibytes (GiB). Default is `50` GiB."
+  default     = 50
+
+  validation {
+    condition     = var.volume_size_in_gib >= 50 && var.volume_size_in_gib <= 2457600
+    error_message = "The volume_size_in_gib value must be greater than or equal to 50 and less than or equal to 2457600."
+  }
+}
+
+variable "volume_spec_name" {
+  type        = string
+  description = "(Optional) Volume spec name is the application specific designation or identifier for the particular volume in a volume group for e.g. data, log."
+  default     = null
+}
+
+variable "volume_type" {
+  type        = string
+  description = "(Optional) What type of volume is this. For destination volumes in Cross Region Replication, set type to `DataProtection`. Default is `null`."
+  default     = null
+
+  validation {
+    condition     = var.volume_type == null || can(regex("^(DataProtection)$", var.volume_type))
+    error_message = "The volume_type value must be either DataProtection."
+  }
 }
 
 variable "location" {
@@ -193,32 +430,6 @@ variable "name" {
   }
 }
 
-variable "size" {
-  type        = number
-  default     = 4398046511104
-  description = <<DESCRIPTION
-  (Required) The size of the capacity pool in bytes. Default is 4 TiB (4398046511104 bytes).
-  
-  You can only take advantage of the 1-TiB minimum if all the volumes in the capacity pool are using Standard network features. "
-  DESCRIPTION
-
-  validation {
-    condition     = var.size > 1099511627776
-    error_message = "The NetApp Files Capacity Pool size must be greater than 1 TiB."
-  }
-}
-
-variable "service_level" {
-  type        = string
-  description = "(Optional) The service level of the capacity pool. Defaults to 'Premium'."
-  default     = "Premium"
-
-  validation {
-    condition     = can(regex("^(Standard|Premium|Ultra)$", var.service_level))
-    error_message = "The NetApp Files Capacity Pool service level must be either 'Standard', 'Premium' or 'Ultra'."
-  }
-}
-
 variable "zone" {
   type        = number
   description = "(Optional) The number of the availability zone where the volume should be created."
@@ -230,3 +441,8 @@ variable "zone" {
   }
 }
 
+variable "prevent_destroy" {
+  type        = bool
+  description = "(Optional) Prevent the volume from being destroyed by accident, via a `lifecycle` block of `prevent_destroy`. Default is `true`."
+  default     = true
+}
