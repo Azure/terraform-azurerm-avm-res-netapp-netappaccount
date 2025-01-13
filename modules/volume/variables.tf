@@ -24,12 +24,12 @@ variable "cool_access" {
 
 variable "cool_access_retrieval_policy" {
   type        = string
-  description = "(Optional) determines the data retrieval behavior from the cool tier to standard storage based on the read pattern for cool access enabled volumes. Possible values are `Default`, `Never`, `OnRead` or `null`. Default is `null`."
+  description = "(Optional) determines the data retrieval behavior from the cool tier to standard storage based on the read pattern for cool access enabled volumes. Possible values are `default`, `never`, `onread` or `null`. Default is `null`."
   default     = null
 
   validation {
-    condition     = can(regex("^(Default|Never|OnRead|null)$", var.cool_access_retrieval_policy))
-    error_message = "The cool_access_retrieval_policy value must be either Default, Never, OnRead or null."
+    condition     = can(regex("^(default|never|onread|null)$", var.cool_access_retrieval_policy))
+    error_message = "The cool_access_retrieval_policy value must be either `default`, `never`, `onread` or `null`."
   }
 }
 
@@ -42,7 +42,76 @@ variable "coolness_period" {
     condition     = var.coolness_period == null || (var.coolness_period >= 2 && var.coolness_period <= 183)
     error_message = "The coolness_period value must be between 2 and 183 or null."
   }
-  
+
+}
+
+variable "creation_token" {
+  type        = string
+  description = "(Optional) A unique file path for the volume. Used when creating mount targets. Default is `null` which means the `name` variable value is used in place."
+  default     = null
+}
+
+variable "default_quota_enabled" {
+  type        = bool
+  default     = false
+  description = "(Optional) Specifies if default quota is enabled for the volume. Default is `false`."
+}
+
+variable "default_group_quota_in_kibs" {
+  type        = number
+  description = "(Optional) Default group quota for volume in KiBs. If `default_quota_enabled` is set, the minimum value of 4 KiBs applies. Default is `null`."
+  default     = null
+
+  validation {
+    condition     = var.default_group_quota_in_kibs == null || var.default_group_quota_in_kibs >= 4
+    error_message = "The `default_user_quota_in_kibs` value must be greater than or equal to `4` or `null`."
+  }
+}
+
+variable "default_user_quota_in_kibs" {
+  type        = number
+  description = "(Optional) Default user quota for volume in KiBs. If `default_quota_enabled` is set, the minimum value of 4 KiBs applies. Default is `null`."
+  default     = null
+
+  validation {
+    condition     = var.default_user_quota_in_kibs == null || var.default_user_quota_in_kibs >= 4
+    error_message = "The `default_user_quota_in_kibs` value must be greater than or equal to `4` or `null`."
+  }
+}
+
+variable "delete_base_snapshot" {
+  type        = bool
+  default     = false
+  description = "(Optional) If enabled (`true`) the snapshot the volume was created from will be automatically deleted after the volume create operation has finished. Defaults to `false`."
+}
+
+variable "enable_sub_volumes" {
+  type        = bool
+  default     = false
+  description = "(Optional) Flag indicating whether subvolume operations are enabled on the volume. Default is `false`."
+}
+
+variable "encryption_key_source" {
+  type        = string
+  description = "(Optional) Source of key used to encrypt data in volume. Applicable if NetApp account has encryption.keySource = `Microsoft.KeyVault`. Possible values (case-insensitive) are: `Microsoft.NetApp` & `Microsoft.KeyVault`. Default is `Microsoft.NetApp`."
+  default     = "Microsoft.NetApp"
+
+  validation {
+    condition     = can(regex("^(Microsoft.KeyVault|Microsoft.NetApp)$", var.encryption_key_source))
+    error_message = "The encryption_key_source value must be either `Microsoft.KeyVault` or `Microsoft.NetApp`."
+  }
+}
+
+variable "key_vault_private_endpoint_resource_id" {
+  type        = string
+  description = "(Optional) The Azure Resource ID of the Private Endpoint to access the required Key Vault. Required if `encryption_key_source` is set to `Microsoft.KeyVault`. Default is `null`. Example: `/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg1/providers/Microsoft.Network/privateEndpoints/pep-kvlt-001`."
+  default     = null
+
+  validation {
+    condition     = var.encryption_key_source == "Microsoft.NetApp" && var.key_vault_private_endpoint_resource_id != null
+    error_message = "The `key_vault_private_endpoint_resource_id` must be set if encryption_key_source is set to `Microsoft.KeyVault`."
+  }
+
 }
 
 variable "encryption_type" {
