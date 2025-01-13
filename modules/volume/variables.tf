@@ -111,7 +111,6 @@ variable "key_vault_private_endpoint_resource_id" {
     condition     = var.encryption_key_source == "Microsoft.NetApp" && var.key_vault_private_endpoint_resource_id != null
     error_message = "The `key_vault_private_endpoint_resource_id` must be set if encryption_key_source is set to `Microsoft.KeyVault`."
   }
-
 }
 
 variable "encryption_type" {
@@ -123,7 +122,41 @@ variable "encryption_type" {
     condition     = can(regex("^(Single|Double)$", var.encryption_type))
     error_message = "The encryption_type value must be either Single or Double."
   }
+}
 
+variable "is_large_volume" {
+  type        = bool
+  default     = false
+  description = "(Optional) Specifies whether the volume is a large volume. Default is `false`."  
+}
+
+variable "kerberos_enabled" {
+  type        = bool
+  default     = false
+  description = "(Optional) Specifies whether the volume is Kerberos enabled. Default is `false`."  
+}
+
+variable "ldap_enabled" {
+  type        = bool
+  default     = false
+  description = "(Optional) Specifies whether the volume is LDAP enabled. Default is `false`."  
+}
+
+variable "network_features" {
+  type = string
+  description = "(Optional) Specifies the network features of the volume Possible values are: `Basic` or `Standard`. Default is `Standard`."
+  default     = "Standard"
+
+  validation {
+    condition     = can(regex("^(Basic|Standard)$", var.network_features))
+    error_message = "The network_features value must be either Basic or Standard."
+  } 
+}
+
+variable "protocol_types" {
+  type        = list(string)
+  description = "(Optional) The list of protocol types for the volume. Possible values are `NFSv3`, `NFSv4.1`, `CIFS`. Default is `NFSv3`."
+  default     = ["NFSv3"]  
 }
 
 variable "qos_type" {
