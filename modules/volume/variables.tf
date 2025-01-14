@@ -150,7 +150,6 @@ variable "export_policy_rules" {
   }))
   default = {}
 
-  # the allowed_clients list must contain either IP addresses or CIDR ranges
   validation {
     condition     = alltrue([for rule in var.export_policy_rules : alltrue([for client in rule.allowed_clients : can(regex("^(?:[0-9]{1,3}\.){3}[0-9]{1,3}(?:\/[0-9]{1,2})?$", client))])])
     error_message = "The `allowed_clients` list must contain either IP addresses or CIDR ranges."
@@ -434,8 +433,8 @@ variable "zone" {
   default     = null
 
   validation {
-    condition     = can(regex("^(1|2|3)$", var.zone))
-    error_message = "The NetApp Files Volume zone must be either 1, 2 or 3."
+    condition     = var.zone == null || can(regex("^(1|2|3)$", var.zone))
+    error_message = "The NetApp Files Volume zone must be either 1, 2, 3 or `null`."
   }
 }
 
