@@ -32,15 +32,9 @@ variable "backup_policy_enforced" {
   description = "(Optional) Specifies whether the backup policy is enforced for the volume. Default is `false`."
 }
 
-variable "capacity_pool" {
-  type = object({
-    resource_id = string
-  })
-  description = <<DESCRIPTION
-  (Required) The Azure NetApp Files Capacity Pool Resource ID, into which the Volume will be created.
-
-  - resource_id - The Azure NetApp Files Capacity Pool Resource ID.
-  DESCRIPTION
+variable "capacity_pool_resource_id" {
+  type = string
+  description = "(Required) The Azure Resource ID of the Capacity Pool where the volume should be placed."
   nullable    = false
 }
 
@@ -63,14 +57,13 @@ variable "cool_access_retrieval_policy" {
 
 variable "coolness_period" {
   type        = number
-  description = "(Optional) Specifies the number of days after which data that is not accessed by clients will be tiered. Values must be between 2 and 183. Default is null."
+  description = "(Optional) Specifies the number of days after which data that is not accessed by clients will be tiered. Values must be between 2 and 183. Default is `null`."
   default     = null
 
   validation {
     condition     = var.coolness_period == null || (var.coolness_period >= 2 && var.coolness_period <= 183)
     error_message = "The coolness_period value must be between 2 and 183 or null."
   }
-
 }
 
 variable "creation_token" {
@@ -164,7 +157,7 @@ variable "export_policy_rules" {
 
   > The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
 
-  - rule_index      - The index of the rule.
+  - rule_index      - The index (number) of the rule. Must be unique.
   - allowed_clients - The list of allowed clients. Must be IP addresses or CIDR ranges.
   - chown_mode      - (Optional) The chown mode of the rule. Possible values are `Restricted` or `Unrestricted`. This variable specifies who is authorized to change the ownership of a file. `Restricted` - Only root user can change the ownership of the file. `Unrestricted` - Non-root users can change ownership of files that they own.
   - cifs            - (Optional) Specifies whether CIFS protocol is allowed.
@@ -196,7 +189,7 @@ variable "key_vault_private_endpoint_resource_id" {
 
 variable "encryption_type" {
   type        = string
-  description = "(Optional) Specifies the encryption type of the volume."
+  description = "(Optional) Specifies the encryption type of the volume. Possible values are `Single` or `Double`. Default is `Single`."
   default     = "Single"
 
   validation {
@@ -250,19 +243,19 @@ variable "placement_rules" {
 }
 
 variable "protocol_types" {
-  type        = list(string)
-  description = "(Optional) The list of protocol types for the volume. Possible values are `nfsv3`, `nfsv4.1`, `cifs`. Default is `nfsv3`."
-  default     = ["NFSv3"]
+  type        = set(string)
+  description = "(Optional) The set of protocol types for the volume. Possible values are `nfsv3`, `nfsv4.1`, `cifs`. Default is `nfsv3`."
+  default     = ["nfsv3"]
 
   validation {
     condition     = alltrue([for protocol in var.protocol_types : can(regex("^(nfsv3|nfsv4.1|cifs)$", protocol))])
-    error_message = "The `protocol_types` value must be a list containing values of: `nfsv3`, `nfsv4.1`, `cifs`."
+    error_message = "The `protocol_types` value must be a set containing values of: `nfsv3`, `nfsv4.1`, `cifs`."
   }
 }
 
 variable "proximity_placement_group_resource_id" {
   type        = string
-  description = "(Optional) The resource ID of the Proximity Placement Group the volume should be placed in."
+  description = "(Optional) The resource ID of the Proximity Placement Group the volume should be placed in. Default is `null`."
   default     = null
 
   validation {
@@ -284,7 +277,7 @@ variable "security_style" {
 
 variable "service_level" {
   type        = string
-  description = "(Optional) The service level of the volume. Defaults to `Standard`."
+  description = "(Optional) The service level of the volume. Possible values are `Standard`, `Premium` or `Ultra`. Defaults to `Standard`."
   default     = "Standard"
 
   validation {
@@ -336,7 +329,7 @@ variable "snapshot_policy_resource_id" {
 
 variable "subnet_resource_id" {
   type        = string
-  description = "(Optional) The Azure Resource ID of the Subnet where the volume should be placed. Subnet must have the delegation `Microsoft.NetApp/volumes`."
+  description = "The Azure Resource ID of the Subnet where the volume should be placed. Subnet must have the delegation `Microsoft.NetApp/volumes`."
 
   validation {
     condition     = can(regex("^/subscriptions/[^/]+/resourceGroups/[^/]+/providers/Microsoft.Network/virtualNetworks/[^/]+/subnets/[^/]+$", var.subnet_resource_id))
@@ -365,7 +358,7 @@ variable "unix_permissions" {
   
   `0755` - gives read/write/execute permissions to owner and read/execute to group and other users.
 
-  For more information, see https://learn.microsoft.com/azure/azure-netapp-files/configure-unix-permissions-change-ownership-mode and https://wikipedia.org/wiki/File-system_permissions#Numeric_notation
+  For more information, see https://learn.microsoft.com/azure/azure-netapp-files/configure-unix-permissions-change-ownership-mode and https://wikipedia.org/wiki/File-system_permissions#Numeric_notation.
 
   Default is `0770`.
   DESCRIPTION
@@ -390,7 +383,7 @@ variable "volume_size_in_gib" {
 
 variable "volume_spec_name" {
   type        = string
-  description = "(Optional) Volume spec name is the application specific designation or identifier for the particular volume in a volume group for e.g. data, log."
+  description = "(Optional) Volume spec name is the application specific designation or identifier for the particular volume in a volume group for e.g. `data`, `log`. Default is `null`."
   default     = null
 }
 
@@ -429,7 +422,7 @@ variable "name" {
 
 variable "zone" {
   type        = number
-  description = "(Optional) The number of the availability zone where the volume should be created."
+  description = "(Optional) The number of the availability zone where the volume should be created. Possible values are `1`, `2`, `3` or `null`. Default is `null`."
   default     = null
 
   validation {
@@ -440,6 +433,6 @@ variable "zone" {
 
 variable "prevent_destroy" {
   type        = bool
-  description = "(Optional) Prevent the volume from being destroyed by accident, via a `lifecycle` block of `prevent_destroy`. Default is `true`."
+  description = "(Optional) Prevent the volume from being destroyed by accident via Terraform, via a `lifecycle` block of `prevent_destroy`. Default is `true`."
   default     = true
 }

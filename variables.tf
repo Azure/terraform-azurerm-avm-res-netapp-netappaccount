@@ -382,12 +382,145 @@ DESCRIPTION
 
 variable "volumes" {
   type = map(object({
-    name    = string
-    tags    = optional(map(string), null)
-    capacity_pool_map_key = string
-    
+    name                         = string
+    capacity_pool_map_key        = string
+    subnet_resource_id           = string
+    tags                         = optional(map(string))
+    avs_data_store               = optional(bool)
+    backup_policy_map_key        = optional(string)
+    backup_vault_map_key         = optional(string)
+    backup_policy_enforced       = optional(bool)
+    cool_access                  = optional(bool)
+    cool_access_retrieval_policy = optional(string)
+    coolness_period              = optional(number)
+    creation_token               = optional(string)
+    default_quota_enabled        = optional(bool)
+    default_group_quota_in_kibs  = optional(number)
+    default_user_quota_in_kibs   = optional(number)
+    delete_base_snapshot         = optional(bool)
+    enable_sub_volumes           = optional(bool)
+    encryption_key_source        = optional(string)
+    export_policy_rules = optional(map(object({
+      rule_index      = number
+      allowed_clients = list(string)
+      chown_mode      = optional(string)
+      cifs            = optional(bool)
+      ntfsv3          = optional(bool)
+      ntfsv41         = optional(bool)
+      has_root_access = optional(bool)
+      kerberos5i_ro   = optional(bool)
+      kerberos5i_rw   = optional(bool)
+      kerberos5p_ro   = optional(bool)
+      kerberos5p_rw   = optional(bool)
+      kerberos5_ro    = optional(bool)
+      kerberos5_rw    = optional(bool)
+      unix_ro         = optional(bool)
+      unix_rw         = optional(bool)
+    })))
+    key_vault_private_endpoint_resource_id = optional(string)
+    encryption_type                        = optional(string)
+    is_large_volume                        = optional(bool)
+    kerberos_enabled                       = optional(bool)
+    ldap_enabled                           = optional(bool)
+    network_features                       = optional(string)
+    placement_rules = optional(list(object({
+      key   = optional(string)
+      value = optional(string)
+    })))
+    protocol_types                        = optional(set(string))
+    proximity_placement_group_resource_id = optional(string)
+    security_style                        = optional(string)
+    service_level                         = optional(string)
+    smb_access_based_enumeration_enabled  = optional(bool)
+    smb_continuously_available            = optional(bool)
+    smb_encryption                        = optional(bool)
+    smb_non_browsable                     = optional(bool)
+    snapshot_directory_visible            = optional(bool)
+    snapshot_policy_map_key               = optional(string)
+    throughput_mibps                      = optional(number)
+    unix_permissions                      = optional(string)
+    volume_size_in_gib                    = optional(number)
+    volume_spec_name                      = optional(string)
+    volume_type                           = optional(string)
+    zone                                  = optional(number)
+    prevent_destroy                       = optional(bool)
   }))
-    
+  default = {}
 
-  
+  description = <<DESCRIPTION
+
+(Optional) A map of volumes to create in the ANF account capacity pool specified by the `capacity_pool_map_key`. 
+
+> The capacity pool must be specified in the `capacity_pools` variable of this module. If it is not, then please call the volume child module directly to create a volume on a capacity pool managed outside of this module.
+
+> The backup policy must be specified in the `backup_policies` variable of this module. If it is not, then please call the volume child module directly to create a volume with a backup policy managed outside of this module.
+
+> The backup vault must be specified in the `backup_vaults` variable of this module. If it is not, then please call the volume child module directly to create a volume with a backup vault managed outside of this module.
+
+> The snapshot policy must be specified in the `snapshot_policies` variable of this module. If it is not, then please call the volume child module directly to create a volume with a snapshot policy managed outside of this module.
+
+The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
+
+- `name` - The name of the volume.
+- `capacity_pool_map_key` - The key of the capacity pool in the `var.capacity_pools` map to create the volume in.
+- `subnet_resource_id` - The Azure Resource ID of the Subnet where the volume should be placed. Subnet must have the delegation `Microsoft.NetApp/volumes`.
+- `tags` - (Optional) Tags of the resource.
+- `avs_data_store` - (Optional) Specifies if the volume is an AVS data store. Default is `false`.
+- `backup_policy_map_key` - (Optional) The key of the backup policy in the `var.backup_policies` map to associate with the volume. Default is `null`.
+- `backup_vault_map_key` - (Optional) The key of the backup vault in the `var.backup_vaults` map to associate with the volume. Default is `null`.
+- `backup_policy_enforced` - (Optional) Specifies whether the backup policy is enforced for the volume. Default is `false`.
+- `cool_access` - (Optional) Specifies whether the volume is cool access enabled. Default is `false`.
+- `cool_access_retrieval_policy` - (Optional) determines the data retrieval behavior from the cool tier to standard storage based on the read pattern for cool access enabled volumes. Possible values are `default`, `never`, `onread` or `null`. Default is `null`.
+- `coolness_period` - (Optional) Specifies the number of days after which data that is not accessed by clients will be tiered. Values must be between 2 and 183. Default is `null`.
+- `creation_token` - (Optional) A unique file path for the volume. Used when creating mount targets. Default is `null` which means the `name` variable value is used in place.
+- `default_quota_enabled` - (Optional) Specifies if default quota is enabled for the volume. Default is `false`.
+- `default_group_quota_in_kibs` - (Optional) Default group quota for volume in KiBs. If `default_quota_enabled` is set, the minimum value of 4 KiBs applies. Default is `null`.
+- `default_user_quota_in_kibs` - (Optional) Default user quota for volume in KiBs. If `default_quota_enabled` is set, the minimum value of 4 KiBs applies. Default is `null`.
+- `delete_base_snapshot` - (Optional) If enabled (`true`) the snapshot the volume was created from will be automatically deleted after the volume create operation has finished. Defaults to `false`.
+- `enable_sub_volumes` - (Optional) Flag indicating whether subvolume operations are enabled on the volume. Default is `false`.
+- `encryption_key_source` - (Optional) Source of key used to encrypt data in volume. Applicable if NetApp account has encryption.keySource = `Microsoft.KeyVault`. Possible values (case-insensitive) are: `Microsoft.NetApp` & `Microsoft.KeyVault`. Default is `Microsoft.NetApp`.
+- `export_policy_rules` - (Optional) A map of export policy rules for the volume. Default is `{}`. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
+  - `rule_index` - The index (number) of the rule. Must be unique.
+  - allowed_clients - The list of allowed clients. Must be IP addresses or CIDR ranges.
+  - chown_mode      - (Optional) The chown mode of the rule. Possible values are `Restricted` or `Unrestricted`. This variable specifies who is authorized to change the ownership of a file. `Restricted` - Only root user can change the ownership of the file. `Unrestricted` - Non-root users can change ownership of files that they own.
+  - cifs            - (Optional) Specifies whether CIFS protocol is allowed.
+  - ntfsv3          - (Optional) Specifies whether NFSv3 protocol is allowed. Enable only for NFSv3 type volumes.
+  - ntfsv41         - (Optional) Specifies whether NFSv4.1 protocol is allowed. Enable only for NFSv4.1 type volumes.
+  - has_root_access - (Optional) Specifies whether root access is allowed.
+  - kerberos5i_ro   - (Optional) Specifies whether Kerberos 5i read-only is allowed.
+  - kerberos5i_rw   - (Optional) Specifies whether Kerberos 5i read-write is allowed.
+  - kerberos5p_ro   - (Optional) Specifies whether Kerberos 5p read-only is allowed.
+  - kerberos5p_rw   - (Optional) Specifies whether Kerberos 5p read-write is allowed.
+  - kerberos5_ro    - (Optional) Specifies whether Kerberos 5 read-only is allowed.
+  - kerberos5_rw    - (Optional) Specifies whether Kerberos 5 read-write is allowed.
+  - unix_ro         - (Optional) Specifies whether UNIX read-only is allowed.
+  - unix_rw         - (Optional) Specifies whether UNIX read-write is allowed.
+- `key_vault_private_endpoint_resource_id` - (Optional) The Azure Resource ID of the Private Endpoint to access the required Key Vault. Required if `encryption_key_source` is set to `Microsoft.KeyVault`. Default is `null`. Example: `/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg1/providers/Microsoft.Network/privateEndpoints/pep-kvlt-001`.
+- `encryption_type` - (Optional) Specifies the encryption type of the volume. Possible values are `Single` or `Double`. Default is `Single`.
+- `is_large_volume` - (Optional) Specifies whether the volume is a large volume. Default is `false`.
+- `kerberos_enabled` - (Optional) Specifies whether Kerberos is enabled for the volume. Default is `false`.
+- `ldap_enabled` - (Optional) Specifies whether LDAP is enabled for the volume. Default is `false`.
+- `network_features` - (Optional) Specifies the network features of the volume Possible values are: `Basic` or `Standard`. Default is `Standard`.
+- `placement_rules` - (Optional) A list of placement rule objects for the volume. Default is `[]`.
+  - `key` - The key of the placement rule.
+  - `value` - The value of the placement rule.
+- `protocol_types` - (Optional) The set of protocol types for the volume. Possible values are `nfsv3`, `nfsv4.1`, `cifs`. Default is `nfsv3`.
+- `proximity_placement_group_resource_id` - (Optional) The resource ID of the Proximity Placement Group the volume should be placed in. Default is `null`.
+- `security_style` - (Optional) The security style of the volume. Possible values are `ntfs` or `unix`. Defaults to `unix` for NFS volumes or `ntfs` for CIFS and dual protocol volumes.
+- `service_level` - (Optional) The service level of the volume. Possible values are `Standard`, `Premium` or `Ultra`. Defaults to `Standard`.
+- `smb_access_based_enumeration_enabled` - (Optional) Specifies whether SMB access-based enumeration is enabled. Only support on SMB or dual protocol volumes. Default is `false`.
+- `smb_continuously_available` - (Optional) Specifies whether the volume is continuously available. Only supported on SMB volumes. Default is `false`.
+- `smb_encryption` - (Optional) Enables encryption for in-flight smb3 data. Only support on SMB or dual protocol volumes. Default is `false`.
+- `smb_non_browsable` - (Optional) Enables non-browsable property for SMB Shares. Only support on SMB or dual protocol volumes. Default is `false`.
+- `snapshot_directory_visible` - (Optional) If enabled (`true`) the volume will contain a read-only snapshot directory which provides access to each of the volume's snapshots. Default is `true`.
+- `snapshot_policy_map_key` - (Optional) The key of the snapshot policy in the `var.snapshot_policies` map to associate with the volume. Default is `null`.
+- `throughput_mibps` - (Optional) Maximum throughput in MiB/s that can be achieved by this volume and this will be accepted as input only for manual qosType volume. Default is `null`.
+- `unix_permissions` - (Optional) UNIX permissions for NFS volume accepted in octal 4 digit format. First digit selects the set user ID(4), set group ID (2) and sticky (1) attributes. Second digit selects permission for the owner of the file: read (4), write (2) and execute (1). Third selects permissions for other users in the same group. The fourth for other users not in the group. `0755` - gives read/write/execute permissions to owner and read/execute to group and other users. For more information, see https://learn.microsoft.com/azure/azure-netapp-files/configure-unix-permissions-change-ownership-mode and https://wikipedia.org/wiki/File-system_permissions#Numeric_notation. Default is `0770`.
+- `volume_size_in_gib` - (Optional) The size of the volume in Gibibytes (GiB). Default is `50` GiB.
+- `volume_spec_name` - (Optional) Volume spec name is the application specific designation or identifier for the particular volume in a volume group for e.g. `data`, `log`. Default is `null`.
+- `volume_type` - (Optional) What type of volume is this. For destination volumes in Cross Region Replication, set type to `DataProtection`. Default is `null`.
+- `zone` - (Optional) The number of the availability zone where the volume should be created. Possible values are `1`, `2`, `3` or `null`. Default is `null`.
+- `prevent_destroy` - (Optional) Prevent the volume from being destroyed by accident via Terraform, via a `lifecycle` block of `prevent_destroy`. Default is `true`.
+
+DESCRIPTION
 }
