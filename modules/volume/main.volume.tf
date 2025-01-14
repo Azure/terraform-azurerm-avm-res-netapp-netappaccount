@@ -69,12 +69,7 @@ resource "azapi_resource" "anf-capacity-pool-volume" {
       rules = local.export_policy_rules
     }
 
-    placementRules = length(var.placement_rules) > 0 ? [
-      for rule in var.placement_rules : {
-        key   = rule.key
-        value = rule.value
-      }
-    ] : null
+    placementRules = local.placement_rules
 
   }
 

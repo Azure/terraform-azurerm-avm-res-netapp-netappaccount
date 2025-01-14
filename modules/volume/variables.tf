@@ -236,20 +236,18 @@ variable "network_features" {
 }
 
 variable "placement_rules" {
-  type = map(object({
+  type = list(object({
     key   = optional(string)
     value = optional(string)
   }))
   description = <<DESCRIPTION
-  (Optional) A map of placement rule objects for the volume. Default is `{}`."
-
-  > The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
+  (Optional) A list of placement rule objects for the volume. Default is `[]`."
 
   - key   - The key of the placement rule.
   - value - The value of the placement rule.
 
   DESCRIPTION
-  default     = {}
+  default     = []
 }
 
 variable "protocol_types" {

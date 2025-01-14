@@ -5,6 +5,7 @@ locals {
   smb_access_based_enumeration_enabled = var.smb_access_based_enumeration_enabled == true ? "Enabled" : "Disabled"
   smb_non_browsable                    = var.smb_non_browsable == true ? "Enabled" : "Disabled"
   volume_size_in_bytes                 = var.volume_size_in_gib * 1073741824
+  placement_rules                      = length(var.placement_rules) > 0 ? var.placement_rules : null
 }
 
 locals {
