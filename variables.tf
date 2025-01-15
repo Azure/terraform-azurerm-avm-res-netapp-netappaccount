@@ -390,13 +390,13 @@ variable "volumes" {
     backup_policy_map_key        = optional(string)
     backup_vault_map_key         = optional(string)
     backup_policy_enforced       = optional(bool)
-    cool_access                  = optional(bool)
+    cool_access                  = optional(bool, false)
     cool_access_retrieval_policy = optional(string)
     coolness_period              = optional(number)
     creation_token               = optional(string)
-    default_quota_enabled        = optional(bool)
-    default_group_quota_in_kibs  = optional(number)
-    default_user_quota_in_kibs   = optional(number)
+    default_quota_enabled        = optional(bool, false)
+    default_group_quota_in_kibs  = optional(number, 0)
+    default_user_quota_in_kibs   = optional(number, 0)
     delete_base_snapshot         = optional(bool)
     enable_sub_volumes           = optional(bool)
     encryption_key_source        = optional(string, "Microsoft.NetApp")
@@ -405,8 +405,8 @@ variable "volumes" {
       allowed_clients = list(string)
       chown_mode      = optional(string)
       cifs            = optional(bool)
-      ntfsv3          = optional(bool)
-      ntfsv41         = optional(bool)
+      nfsv3          = optional(bool)
+      nfsv41         = optional(bool)
       has_root_access = optional(bool)
       kerberos5i_ro   = optional(bool)
       kerberos5i_rw   = optional(bool)
@@ -419,29 +419,25 @@ variable "volumes" {
     })))
     key_vault_private_endpoint_resource_id = optional(string)
     encryption_type                        = optional(string, "Single")
-    is_large_volume                        = optional(bool)
-    kerberos_enabled                       = optional(bool)
-    ldap_enabled                           = optional(bool)
+    is_large_volume                        = optional(bool, false)
+    kerberos_enabled                       = optional(bool, false)
+    ldap_enabled                           = optional(bool, false)
     network_features                       = optional(string, "Standard")
-    placement_rules = optional(list(object({
-      key   = optional(string)
-      value = optional(string)
-    })))
-    protocol_types                        = optional(set(string), ["nfsv3"])
+    protocol_types                        = optional(set(string), ["NFSv3"])
     proximity_placement_group_resource_id = optional(string)
     security_style                        = optional(string)
     service_level                         = optional(string, "Standard")
     smb_access_based_enumeration_enabled  = optional(bool)
-    smb_continuously_available            = optional(bool)
-    smb_encryption                        = optional(bool)
+    smb_continuously_available            = optional(bool, false)
+    smb_encryption                        = optional(bool, false)
     smb_non_browsable                     = optional(bool)
-    snapshot_directory_visible            = optional(bool)
+    snapshot_directory_visible            = optional(bool, true)
     snapshot_policy_map_key               = optional(string)
     throughput_mibps                      = optional(number)
     unix_permissions                      = optional(string, "0770")
     volume_size_in_gib                    = optional(number, 50)
     volume_spec_name                      = optional(string)
-    volume_type                           = optional(string)
+    volume_type                           = optional(string, "")
     zone                                  = optional(number)
   }))
   default = {}
@@ -483,8 +479,8 @@ The map key is deliberately arbitrary to avoid issues where map keys maybe unkno
   - allowed_clients - The list of allowed clients. Must be IP addresses or CIDR ranges.
   - chown_mode      - (Optional) The chown mode of the rule. Possible values are `Restricted` or `Unrestricted`. This variable specifies who is authorized to change the ownership of a file. `Restricted` - Only root user can change the ownership of the file. `Unrestricted` - Non-root users can change ownership of files that they own.
   - cifs            - (Optional) Specifies whether CIFS protocol is allowed.
-  - ntfsv3          - (Optional) Specifies whether NFSv3 protocol is allowed. Enable only for NFSv3 type volumes.
-  - ntfsv41         - (Optional) Specifies whether NFSv4.1 protocol is allowed. Enable only for NFSv4.1 type volumes.
+  - nfsv3          - (Optional) Specifies whether NFSv3 protocol is allowed. Enable only for NFSv3 type volumes.
+  - nfsv41         - (Optional) Specifies whether NFSv4.1 protocol is allowed. Enable only for NFSv4.1 type volumes.
   - has_root_access - (Optional) Specifies whether root access is allowed.
   - kerberos5i_ro   - (Optional) Specifies whether Kerberos 5i read-only is allowed.
   - kerberos5i_rw   - (Optional) Specifies whether Kerberos 5i read-write is allowed.
@@ -500,10 +496,7 @@ The map key is deliberately arbitrary to avoid issues where map keys maybe unkno
 - `kerberos_enabled` - (Optional) Specifies whether Kerberos is enabled for the volume. Default is `false`.
 - `ldap_enabled` - (Optional) Specifies whether LDAP is enabled for the volume. Default is `false`.
 - `network_features` - (Optional) Specifies the network features of the volume Possible values are: `Basic` or `Standard`. Default is `Standard`.
-- `placement_rules` - (Optional) A list of placement rule objects for the volume. Default is `[]`.
-  - `key` - The key of the placement rule.
-  - `value` - The value of the placement rule.
-- `protocol_types` - (Optional) The set of protocol types for the volume. Possible values are `nfsv3`, `nfsv4.1`, `cifs`. Default is `nfsv3`.
+- `protocol_types` - (Optional) The set of protocol types for the volume. Possible values are `NFSv3`, `NFSv4.1`, `CIFS`. Default is `NFSv3`.
 - `proximity_placement_group_resource_id` - (Optional) The resource ID of the Proximity Placement Group the volume should be placed in. Default is `null`.
 - `security_style` - (Optional) The security style of the volume. Possible values are `ntfs` or `unix`. Defaults to `unix` for NFS volumes or `ntfs` for CIFS and dual protocol volumes via `local.security_style` in module which uses the `var.protocol_types` values to set this value accordingly. Default is `null`.
 - `service_level` - (Optional) The service level of the volume. Possible values are `Standard`, `Premium` or `Ultra`. Defaults to `Standard`.

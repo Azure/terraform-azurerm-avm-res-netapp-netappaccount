@@ -61,10 +61,10 @@ resource "azapi_resource" "rsg" {
 # vNet and Subnet
 
 resource "azapi_resource" "vnet" {
-  type = "Microsoft.Network/virtualNetworks@2024-05-01"
+  type      = "Microsoft.Network/virtualNetworks@2024-05-01"
   parent_id = azapi_resource.rsg.id
-  location = azapi_resource.rsg.location
-  name = "vnet-${random_shuffle.region.result[0]}-anf-example-everything-${random_pet.name.id}"
+  location  = azapi_resource.rsg.location
+  name      = "vnet-${random_shuffle.region.result[0]}-anf-example-everything-${random_pet.name.id}"
 
   body = {
     properties = {
@@ -158,11 +158,77 @@ module "test" {
     }
   }
 
+  snapshot_policies = {
+    "snap-pol-1" = {
+      name = "snap-pol-1"
+      tags = {
+        configuration = "all"
+      }
+      hourly_schedule = {
+        snapshots_to_keep = 8
+        minute            = 0
+      }
+      daily_schedule = {
+        snapshots_to_keep = 7
+        hour              = 0
+        minute            = 0
+      }
+      weekly_schedule = {
+        snapshots_to_keep = 2
+        day               = ["Monday", "Friday"]
+        minute            = 0
+        hour              = 0
+      }
+      monthly_schedule = {
+        snapshots_to_keep = 6
+        days_of_month     = [1, 30]
+        hour              = 0
+        minute            = 0
+      }
+    }
+    "snap-pol-2" = {
+      name = "snap-pol-2"
+      tags = {
+        configuration = "daily only"
+      }
+      hourly_schedule = {
+        snapshots_to_keep = 8
+        minute            = 0
+      }
+      weekly_schedule = {
+        snapshots_to_keep = 2
+        day               = ["Monday", "Friday"]
+        minute            = 0
+        hour              = 0
+      }
+    }
+  }
+
   volumes = {
     "volume-1" = {
-      name = "volume-1"
+      name                  = "volume-1"
       capacity_pool_map_key = "pool1"
-      subnet_resource_id = azapi_resource.vnet.output.anf_subnet_resource_id.properties.subnets[0].id
+      subnet_resource_id    = azapi_resource.vnet.output.anf_subnet_resource_id
+      service_level         = "Premium"
+      export_policy_rules = {
+        "rule1" = {
+          rule_index      = 1
+          allowed_clients = ["0.0.0.0/0"]
+          chown_mode      = "Restricted"
+          cifs            = false
+          nfsv3           = true
+          nfsv41          = false
+          has_root_access = true
+          kerberos5i_ro   = false
+          kerberos5i_rw   = false
+          kerberos5p_ro   = false
+          kerberos5p_rw   = false
+          kerberos5_ro    = false
+          kerberos5_rw    = false
+          unix_ro         = false
+          unix_rw         = true
+        }
+      }
     }
   }
 }

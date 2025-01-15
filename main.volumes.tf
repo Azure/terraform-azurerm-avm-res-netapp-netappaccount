@@ -30,7 +30,6 @@ module "volumes" {
   kerberos_enabled                       = each.value.kerberos_enabled
   ldap_enabled                           = each.value.ldap_enabled
   network_features                       = each.value.network_features
-  placement_rules                        = each.value.placement_rules
   protocol_types                         = each.value.protocol_types
   proximity_placement_group_resource_id  = each.value.proximity_placement_group_resource_id
   security_style                         = each.value.security_style

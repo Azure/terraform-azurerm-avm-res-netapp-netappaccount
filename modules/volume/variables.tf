@@ -80,22 +80,22 @@ variable "default_quota_enabled" {
 
 variable "default_group_quota_in_kibs" {
   type        = number
-  description = "(Optional) Default group quota for volume in KiBs. If `default_quota_enabled` is set, the minimum value of 4 KiBs applies. Default is `null`."
-  default     = null
+  description = "(Optional) Default group quota for volume in KiBs. If `default_quota_enabled` is set, the minimum value of 4 KiBs applies. Default is `0`."
+  default     = 0
 
   validation {
-    condition     = var.default_group_quota_in_kibs == null ? true : var.default_group_quota_in_kibs >= 4
+    condition     = var.default_group_quota_in_kibs == 0 ? true : var.default_group_quota_in_kibs >= 4
     error_message = "The `default_user_quota_in_kibs` value must be greater than or equal to `4` or `null`."
   }
 }
 
 variable "default_user_quota_in_kibs" {
   type        = number
-  description = "(Optional) Default user quota for volume in KiBs. If `default_quota_enabled` is set, the minimum value of 4 KiBs applies. Default is `null`."
-  default     = null
+  description = "(Optional) Default user quota for volume in KiBs. If `default_quota_enabled` is set, the minimum value of 4 KiBs applies. Default is `0`."
+  default     = 0
 
   validation {
-    condition     = var.default_user_quota_in_kibs == null ? true : var.default_user_quota_in_kibs >= 4
+    condition     = var.default_user_quota_in_kibs == 0 ? true : var.default_user_quota_in_kibs >= 4
     error_message = "The `default_user_quota_in_kibs` value must be greater than or equal to `4` or `null`."
   }
 }
@@ -109,7 +109,7 @@ variable "delete_base_snapshot" {
 variable "enable_sub_volumes" {
   type        = bool
   default     = false
-  description = "(Optional) Flag indicating whether subvolume operations are enabled on the volume. Default is `false`."
+  description = "(Optional) Flag indicating whether sub volume operations are enabled on the volume. Default is `false`."
 }
 
 variable "encryption_key_source" {
@@ -129,8 +129,8 @@ variable "export_policy_rules" {
     allowed_clients = list(string)
     chown_mode      = optional(string)
     cifs            = optional(bool)
-    ntfsv3          = optional(bool)
-    ntfsv41         = optional(bool)
+    nfsv3           = optional(bool)
+    nfsv41          = optional(bool)
     has_root_access = optional(bool)
     kerberos5i_ro   = optional(bool)
     kerberos5i_rw   = optional(bool)
@@ -161,8 +161,8 @@ variable "export_policy_rules" {
   - allowed_clients - The list of allowed clients. Must be IP addresses or CIDR ranges.
   - chown_mode      - (Optional) The chown mode of the rule. Possible values are `Restricted` or `Unrestricted`. This variable specifies who is authorized to change the ownership of a file. `Restricted` - Only root user can change the ownership of the file. `Unrestricted` - Non-root users can change ownership of files that they own.
   - cifs            - (Optional) Specifies whether CIFS protocol is allowed.
-  - ntfsv3          - (Optional) Specifies whether NFSv3 protocol is allowed. Enable only for NFSv3 type volumes.
-  - ntfsv41         - (Optional) Specifies whether NFSv4.1 protocol is allowed. Enable only for NFSv4.1 type volumes.
+  - nfsv3          - (Optional) Specifies whether NFSv3 protocol is allowed. Enable only for NFSv3 type volumes.
+  - nfsv41         - (Optional) Specifies whether NFSv4.1 protocol is allowed. Enable only for NFSv4.1 type volumes.
   - has_root_access - (Optional) Specifies whether root access is allowed.
   - kerberos5i_ro   - (Optional) Specifies whether Kerberos 5i read-only is allowed.
   - kerberos5i_rw   - (Optional) Specifies whether Kerberos 5i read-write is allowed.
@@ -227,29 +227,14 @@ variable "network_features" {
   }
 }
 
-variable "placement_rules" {
-  type = list(object({
-    key   = optional(string)
-    value = optional(string)
-  }))
-  description = <<DESCRIPTION
-  (Optional) A list of placement rule objects for the volume. Default is `[]`."
-
-  - key   - The key of the placement rule.
-  - value - The value of the placement rule.
-
-  DESCRIPTION
-  default     = []
-}
-
 variable "protocol_types" {
   type        = set(string)
-  description = "(Optional) The set of protocol types for the volume. Possible values are `nfsv3`, `nfsv4.1`, `cifs`. Default is `nfsv3`."
-  default     = ["nfsv3"]
+  description = "(Optional) The set of protocol types for the volume. Possible values are `NFSv3`, `NFSv4.1`, `CIFS`. Default is `NFSv3`."
+  default     = ["NFSv3"]
 
   validation {
-    condition     = alltrue([for protocol in var.protocol_types : can(regex("^(nfsv3|nfsv4.1|cifs)$", protocol))])
-    error_message = "The `protocol_types` value must be a set containing values of: `nfsv3`, `nfsv4.1`, `cifs`."
+    condition     = alltrue([for protocol in var.protocol_types : can(regex("^(NFSv3|NFSv4.1|CIFS)$", protocol))])
+    error_message = "The `protocol_types` value must be a set containing values of: `NFSv3`, `NFSv4.1`, `CIFS`."
   }
 }
 
@@ -266,12 +251,12 @@ variable "proximity_placement_group_resource_id" {
 
 variable "security_style" {
   type        = string
-  description = "(Optional) The security style of the volume. Possible values are `ntfs` or `unix`. Defaults to `unix` for NFS volumes or `ntfs` for CIFS and dual protocol volumes via `local.security_style` in module which uses the `var.protocol_types` values to set this value accordingly. Default is `null`."
+  description = "(Optional) The security style of the volume. Possible values are `NTFS` or `Unix`. Defaults to `Unix` for NFS volumes or `NTFS` for CIFS and dual protocol volumes via `local.security_style` in module which uses the `var.protocol_types` values to set this value accordingly. Default is `null`."
   default     = null
 
   validation {
-    condition     = var.security_style == null || can(regex("^(ntfs|unix)$", var.security_style))
-    error_message = "The `security_style` value must be either `ntfs`, `unix` or `null` which will then use the `var.protocol_types` values to set this value accordingly."
+    condition     = var.security_style == null || can(regex("^(NTFS|Unix)$", var.security_style))
+    error_message = "The `security_style` value must be either `NTFS`, `Unix` or `null` which will then use the `var.protocol_types` values to set this value accordingly."
   }
 }
 
@@ -390,10 +375,10 @@ variable "volume_spec_name" {
 variable "volume_type" {
   type        = string
   description = "(Optional) What type of volume is this. For destination volumes in Cross Region Replication, set type to `DataProtection`. Default is `null`."
-  default     = null
+  default     = ""
 
   validation {
-    condition     = var.volume_type == null || can(regex("^(DataProtection)$", var.volume_type))
+    condition     = var.volume_type == "" ? true : can(regex("^(DataProtection)$", var.volume_type))
     error_message = "The volume_type value must be either DataProtection."
   }
 }

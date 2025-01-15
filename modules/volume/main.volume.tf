@@ -17,7 +17,7 @@ resource "azapi_resource" "anf-capacity-pool-volume" {
       defaultGroupQuotaInKiBs           = var.default_group_quota_in_kibs
       defaultUserQuotaInKiBs            = var.default_user_quota_in_kibs
       deleteBaseSnapshot                = var.delete_base_snapshot
-      enableSubvolumes                  = var.enable_sub_volumes
+      enableSubvolumes                  = local.enable_sub_volumes
       encryptionKeySource               = var.encryption_key_source
       isDefaultQuotaEnabled             = var.default_quota_enabled
       isLargeVolume                     = var.is_large_volume
@@ -63,16 +63,13 @@ resource "azapi_resource" "anf-capacity-pool-volume" {
           snapshotPolicyId = var.snapshot_policy_resource_id
         } : null
       }
+
+      exportPolicy = local.export_policy_rules != null ? {
+        rules = local.export_policy_rules
+      } : null
+
     }
-
-    exportPolicy = {
-      rules = local.export_policy_rules
-    }
-
-    placementRules = local.placement_rules
-
   }
 
-  schema_validation_enabled = false
-
+  schema_validation_enabled = true
 }
