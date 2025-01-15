@@ -443,7 +443,6 @@ variable "volumes" {
     volume_spec_name                      = optional(string)
     volume_type                           = optional(string)
     zone                                  = optional(number)
-    prevent_destroy                       = optional(bool)
   }))
   default = {}
 
@@ -520,7 +519,6 @@ The map key is deliberately arbitrary to avoid issues where map keys maybe unkno
 - `volume_spec_name` - (Optional) Volume spec name is the application specific designation or identifier for the particular volume in a volume group for e.g. `data`, `log`. Default is `null`.
 - `volume_type` - (Optional) What type of volume is this. For destination volumes in Cross Region Replication, set type to `DataProtection`. Default is `null`.
 - `zone` - (Optional) The number of the availability zone where the volume should be created. Possible values are `1`, `2`, `3` or `null`. Default is `null`.
-- `prevent_destroy` - (Optional) Prevent the volume from being destroyed by accident via Terraform, via a `lifecycle` block of `prevent_destroy`. Default is `true`.
 
 DESCRIPTION
 }

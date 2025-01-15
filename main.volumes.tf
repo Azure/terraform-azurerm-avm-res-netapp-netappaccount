@@ -47,7 +47,6 @@ module "volumes" {
   volume_spec_name                       = each.value.volume_spec_name
   volume_type                            = each.value.volume_type
   zone                                   = each.value.zone
-  prevent_destroy                        = each.value.prevent_destroy
 
   depends_on = [
     module.capacity-pools,

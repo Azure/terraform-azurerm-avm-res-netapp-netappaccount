@@ -75,8 +75,4 @@ resource "azapi_resource" "anf-capacity-pool-volume" {
 
   schema_validation_enabled = false
 
-  lifecycle {
-    prevent_destroy = var.prevent_destroy
-  }
-
 }

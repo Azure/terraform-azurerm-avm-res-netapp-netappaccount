@@ -33,7 +33,7 @@ variable "backup_policy_enforced" {
 }
 
 variable "capacity_pool_resource_id" {
-  type = string
+  type        = string
   description = "(Required) The Azure Resource ID of the Capacity Pool where the volume should be placed."
   nullable    = false
 }
@@ -144,7 +144,7 @@ variable "export_policy_rules" {
   default = {}
 
   validation {
-    condition     = alltrue([for rule in var.export_policy_rules : alltrue([for client in rule.allowed_clients : can(regex("^(?:[0-9]{1,3}\.){3}[0-9]{1,3}(?:\/[0-9]{1,2})?$", client))])])
+    condition     = alltrue([for rule in var.export_policy_rules : alltrue([for client in rule.allowed_clients : can(regex("^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}(?:\\/[0-9]{1,2})?$", client))])])
     error_message = "The `allowed_clients` list must contain either IP addresses or CIDR ranges."
   }
   validation {
@@ -429,10 +429,4 @@ variable "zone" {
     condition     = var.zone == null || can(regex("^(1|2|3)$", var.zone))
     error_message = "The NetApp Files Volume zone must be either 1, 2, 3 or `null`."
   }
-}
-
-variable "prevent_destroy" {
-  type        = bool
-  description = "(Optional) Prevent the volume from being destroyed by accident via Terraform, via a `lifecycle` block of `prevent_destroy`. Default is `true`."
-  default     = true
 }
