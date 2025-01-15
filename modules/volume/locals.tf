@@ -1,15 +1,15 @@
 locals {
   avs_data_store                       = var.avs_data_store == true ? "Enabled" : "Disabled"
   creation_token                       = var.creation_token != null ? var.creation_token : var.name
-  security_style                       = contains(lower(var.protocol_types), "cifs") ? "ntfs" : "unix"
+  security_style                       = var.security_style == null ? contains([for protocol in var.protocol_types : lower(protocol)], "cifs") ? "ntfs" : "unix" : var.security_style
   smb_access_based_enumeration_enabled = var.smb_access_based_enumeration_enabled == true ? "Enabled" : "Disabled"
   smb_non_browsable                    = var.smb_non_browsable == true ? "Enabled" : "Disabled"
   volume_size_in_bytes                 = var.volume_size_in_gib * 1073741824
-  placement_rules                      = length(var.placement_rules) > 0 ? var.placement_rules : null
+  placement_rules                      = length(coalesce(var.placement_rules, [])) > 0 ? var.placement_rules : null
 }
 
 locals {
-  export_policy_rules = length(var.export_policy_rules) > 0 ? [
+  export_policy_rules = length(coalesce(var.export_policy_rules, {})) > 0 ? [
     for rule in var.export_policy_rules : {
       rule_index      = rule.rule_index
       allowed_clients = join(",", rule.allowed_clients)

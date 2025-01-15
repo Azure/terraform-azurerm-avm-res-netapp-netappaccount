@@ -50,7 +50,7 @@ variable "cool_access_retrieval_policy" {
   default     = null
 
   validation {
-    condition     = can(regex("^(default|never|onread|null)$", var.cool_access_retrieval_policy))
+    condition     = var.cool_access_retrieval_policy == null || can(regex("^(default|never|onread|null)$", var.cool_access_retrieval_policy))
     error_message = "The cool_access_retrieval_policy value must be either `default`, `never`, `onread` or `null`."
   }
 }
@@ -61,7 +61,7 @@ variable "coolness_period" {
   default     = null
 
   validation {
-    condition     = var.coolness_period == null || (var.coolness_period >= 2 && var.coolness_period <= 183)
+    condition     = var.coolness_period == null ? true : (var.coolness_period >= 2 && var.coolness_period <= 183)
     error_message = "The coolness_period value must be between 2 and 183 or null."
   }
 }
@@ -84,7 +84,7 @@ variable "default_group_quota_in_kibs" {
   default     = null
 
   validation {
-    condition     = var.default_group_quota_in_kibs == null || var.default_group_quota_in_kibs >= 4
+    condition     = var.default_group_quota_in_kibs == null ? true : var.default_group_quota_in_kibs >= 4
     error_message = "The `default_user_quota_in_kibs` value must be greater than or equal to `4` or `null`."
   }
 }
@@ -95,7 +95,7 @@ variable "default_user_quota_in_kibs" {
   default     = null
 
   validation {
-    condition     = var.default_user_quota_in_kibs == null || var.default_user_quota_in_kibs >= 4
+    condition     = var.default_user_quota_in_kibs == null ? true : var.default_user_quota_in_kibs >= 4
     error_message = "The `default_user_quota_in_kibs` value must be greater than or equal to `4` or `null`."
   }
 }
@@ -144,11 +144,11 @@ variable "export_policy_rules" {
   default = {}
 
   validation {
-    condition     = alltrue([for rule in var.export_policy_rules : alltrue([for client in rule.allowed_clients : can(regex("^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}(?:\\/[0-9]{1,2})?$", client))])])
+    condition     = var.export_policy_rules == {} ? true : alltrue([for rule in coalesce(var.export_policy_rules, {}) : alltrue([for client in rule.allowed_clients : can(regex("^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}(?:\\/[0-9]{1,2})?$", client))])])
     error_message = "The `allowed_clients` list must contain either IP addresses or CIDR ranges."
   }
   validation {
-    condition     = alltrue([for rule in var.export_policy_rules : can(regex("^(Restricted|Unrestricted)$", rule.chown_mode))])
+    condition     = var.export_policy_rules == {} ? true : alltrue([for rule in coalesce(var.export_policy_rules, {}) : can(regex("^(Restricted|Unrestricted)$", rule.chown_mode))])
     error_message = "The `chown_mode` value must be either `Restricted` or `Unrestricted`."
   }
 
@@ -182,7 +182,7 @@ variable "key_vault_private_endpoint_resource_id" {
   default     = null
 
   validation {
-    condition     = var.encryption_key_source == "Microsoft.NetApp" && var.key_vault_private_endpoint_resource_id != null && can(regex("^/subscriptions/[^/]+/resourceGroups/[^/]+/providers/Microsoft.Network/privateEndpoints/[^/]+$", var.key_vault_private_endpoint_resource_id))
+    condition     = var.key_vault_private_endpoint_resource_id == null || (var.encryption_key_source == "Microsoft.NetApp" && var.key_vault_private_endpoint_resource_id != null && can(regex("^/subscriptions/[^/]+/resourceGroups/[^/]+/providers/Microsoft.Network/privateEndpoints/[^/]+$", var.key_vault_private_endpoint_resource_id)))
     error_message = "The `key_vault_private_endpoint_resource_id` must be set if encryption_key_source is set to `Microsoft.KeyVault`. It must also be a valid Azure Resource ID."
   }
 }
@@ -259,19 +259,19 @@ variable "proximity_placement_group_resource_id" {
   default     = null
 
   validation {
-    condition     = can(regex("^/subscriptions/[^/]+/resourceGroups/[^/]+/providers/Microsoft.Compute/proximityPlacementGroups/[^/]+$", var.proximity_placement_group_resource_id))
+    condition     = var.proximity_placement_group_resource_id == null || can(regex("^/subscriptions/[^/]+/resourceGroups/[^/]+/providers/Microsoft.Compute/proximityPlacementGroups/[^/]+$", var.proximity_placement_group_resource_id))
     error_message = "The `proximity_placement_group_resource_id` must be a valid Azure Resource ID."
   }
 }
 
 variable "security_style" {
   type        = string
-  description = "(Optional) The security style of the volume. Possible values are `ntfs` or `unix`. Defaults to `unix` for NFS volumes or `ntfs` for CIFS and dual protocol volumes."
-  default     = "unix"
+  description = "(Optional) The security style of the volume. Possible values are `ntfs` or `unix`. Defaults to `unix` for NFS volumes or `ntfs` for CIFS and dual protocol volumes via `local.security_style` in module which uses the `var.protocol_types` values to set this value accordingly. Default is `null`."
+  default     = null
 
   validation {
-    condition     = can(regex("^(ntfs|unix)$", var.security_style))
-    error_message = "The `security_style` value must be either `ntfs` or `unix`."
+    condition     = var.security_style == null || can(regex("^(ntfs|unix)$", var.security_style))
+    error_message = "The `security_style` value must be either `ntfs`, `unix` or `null` which will then use the `var.protocol_types` values to set this value accordingly."
   }
 }
 
@@ -366,7 +366,7 @@ variable "unix_permissions" {
 
   validation {
     condition     = can(regex("^[0-7]{4}$", var.unix_permissions))
-    error_message = "The `unix_permissions` value must be a 4-digit octal number."
+    error_message = "The `unix_permissions` value must be a 4-digit octal number in a string."
   }
 }
 
@@ -415,7 +415,7 @@ variable "name" {
   description = "(Required) The name of the volume."
 
   validation {
-    condition     = can(regex("^[a-zA-Z0-9_-]{1,64}$", var.name) && var.name != "default" && var.name != "bin")
+    condition     = can(regex("^[a-zA-Z0-9_-]{1,64}$", var.name)) && var.name != "default" && var.name != "bin"
     error_message = "The NetApp Files Volume name must be be 1-64 characters in length and can only contain alphanumeric, hyphens and underscores. The name cannot be `default` or `bin`."
   }
 }

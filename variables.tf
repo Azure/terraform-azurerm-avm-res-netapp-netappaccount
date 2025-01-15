@@ -399,7 +399,7 @@ variable "volumes" {
     default_user_quota_in_kibs   = optional(number)
     delete_base_snapshot         = optional(bool)
     enable_sub_volumes           = optional(bool)
-    encryption_key_source        = optional(string)
+    encryption_key_source        = optional(string, "Microsoft.NetApp")
     export_policy_rules = optional(map(object({
       rule_index      = number
       allowed_clients = list(string)
@@ -418,19 +418,19 @@ variable "volumes" {
       unix_rw         = optional(bool)
     })))
     key_vault_private_endpoint_resource_id = optional(string)
-    encryption_type                        = optional(string)
+    encryption_type                        = optional(string, "Single")
     is_large_volume                        = optional(bool)
     kerberos_enabled                       = optional(bool)
     ldap_enabled                           = optional(bool)
-    network_features                       = optional(string)
+    network_features                       = optional(string, "Standard")
     placement_rules = optional(list(object({
       key   = optional(string)
       value = optional(string)
     })))
-    protocol_types                        = optional(set(string))
+    protocol_types                        = optional(set(string), ["nfsv3"])
     proximity_placement_group_resource_id = optional(string)
     security_style                        = optional(string)
-    service_level                         = optional(string)
+    service_level                         = optional(string, "Standard")
     smb_access_based_enumeration_enabled  = optional(bool)
     smb_continuously_available            = optional(bool)
     smb_encryption                        = optional(bool)
@@ -438,8 +438,8 @@ variable "volumes" {
     snapshot_directory_visible            = optional(bool)
     snapshot_policy_map_key               = optional(string)
     throughput_mibps                      = optional(number)
-    unix_permissions                      = optional(string)
-    volume_size_in_gib                    = optional(number)
+    unix_permissions                      = optional(string, "0770")
+    volume_size_in_gib                    = optional(number, 50)
     volume_spec_name                      = optional(string)
     volume_type                           = optional(string)
     zone                                  = optional(number)
@@ -505,7 +505,7 @@ The map key is deliberately arbitrary to avoid issues where map keys maybe unkno
   - `value` - The value of the placement rule.
 - `protocol_types` - (Optional) The set of protocol types for the volume. Possible values are `nfsv3`, `nfsv4.1`, `cifs`. Default is `nfsv3`.
 - `proximity_placement_group_resource_id` - (Optional) The resource ID of the Proximity Placement Group the volume should be placed in. Default is `null`.
-- `security_style` - (Optional) The security style of the volume. Possible values are `ntfs` or `unix`. Defaults to `unix` for NFS volumes or `ntfs` for CIFS and dual protocol volumes.
+- `security_style` - (Optional) The security style of the volume. Possible values are `ntfs` or `unix`. Defaults to `unix` for NFS volumes or `ntfs` for CIFS and dual protocol volumes via `local.security_style` in module which uses the `var.protocol_types` values to set this value accordingly. Default is `null`.
 - `service_level` - (Optional) The service level of the volume. Possible values are `Standard`, `Premium` or `Ultra`. Defaults to `Standard`.
 - `smb_access_based_enumeration_enabled` - (Optional) Specifies whether SMB access-based enumeration is enabled. Only support on SMB or dual protocol volumes. Default is `false`.
 - `smb_continuously_available` - (Optional) Specifies whether the volume is continuously available. Only supported on SMB volumes. Default is `false`.

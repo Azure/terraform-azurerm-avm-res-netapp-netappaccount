@@ -58,6 +58,45 @@ resource "azapi_resource" "rsg" {
   }
 }
 
+# vNet and Subnet
+
+resource "azapi_resource" "vnet" {
+  type = "Microsoft.Network/virtualNetworks@2024-05-01"
+  parent_id = azapi_resource.rsg.id
+  location = azapi_resource.rsg.location
+  name = "vnet-${random_shuffle.region.result[0]}-anf-example-everything-${random_pet.name.id}"
+
+  body = {
+    properties = {
+      addressSpace = {
+        addressPrefixes = [
+          "10.0.0.0/16"
+        ]
+      }
+      subnets = [
+        {
+          name = "subnet-anf-001"
+          properties = {
+            addressPrefix = "10.0.1.0/24"
+            delegations = [
+              {
+                name = "Microsoft.NetApp/volumes"
+                properties = {
+                  serviceName = "Microsoft.NetApp/volumes"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+
+  response_export_values = {
+    "anf_subnet_resource_id" = "properties.subnets[0].id"
+  }
+}
+
 # This is the module call
 # Do not specify location here due to the randomization above.
 # Leaving location as `null` will cause the module to use the resource group location
@@ -123,6 +162,7 @@ module "test" {
     "volume-1" = {
       name = "volume-1"
       capacity_pool_map_key = "pool1"
+      subnet_resource_id = azapi_resource.vnet.output.anf_subnet_resource_id.properties.subnets[0].id
     }
   }
 }
