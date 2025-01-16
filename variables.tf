@@ -176,10 +176,10 @@ variable "tags" {
 # Capacity Pools
 variable "capacity_pools" {
   type = map(object({
-    name            = optional(string)
+    name            = string
     cool_access     = optional(bool, false)
     encryption_type = optional(string, "Single")
-    size            = optional(number)
+    size            = number
     qos_type        = optional(string, "Auto")
     service_level   = optional(string)
     tags            = optional(map(string), null)

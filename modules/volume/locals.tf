@@ -27,42 +27,6 @@ locals {
       unixReadOnly        = rule.unix_ro
       unixReadWrite       = rule.unix_rw
     }
-    ] : [ # Default export policy rule for NFSv3 volume as if created from portal
-    {
-      allowedClients      = "0.0.0.0/0"
-      chownMode           = "Restricted"
-      cifs                = false
-      hasRootAccess       = true
-      kerberos5ReadOnly   = false
-      kerberos5ReadWrite  = false
-      kerberos5iReadOnly  = false
-      kerberos5iReadWrite = false
-      kerberos5pReadOnly  = false
-      kerberos5pReadWrite = false
-      nfsv3               = true
-      nfsv41              = false
-      ruleIndex           = 1
-      unixReadOnly        = false
-      unixReadWrite       = true
-    }
-  ]
+  ] : null
 }
-
-# {
-#     rule_index      = 1
-#     allowed_clients = "0.0.0.0/0"
-#     chown_mode      = "Restricted"
-#     cifs            = false
-#     ntfsv3          = true
-#     ntfsv41         = false
-#     has_root_access = true
-#     kerberos5i_ro   = false
-#     kerberos5i_rw   = false
-#     kerberos5p_ro   = false
-#     kerberos5p_rw   = false
-#     kerberos5_ro    = false
-#     kerberos5_rw    = false
-#     unix_ro         = false
-#     unix_rw         = true
-#   }
 

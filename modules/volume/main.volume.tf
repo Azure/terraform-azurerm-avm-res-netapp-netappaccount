@@ -47,7 +47,7 @@ resource "azapi_resource" "anf-capacity-pool-volume" {
           backupVaultId  = var.backup_vault_resource_id
           policyEnforced = var.backup_policy_enforced
         } : null
-        # To be added in future requires some POST operations via azapi_resource_action
+        # To be added in future requires some POST operations via azapi_resource_action - do as seperate child module
         # replication = {
         #   endpointType           = 
         #   remoteVolumeRegion     = 
