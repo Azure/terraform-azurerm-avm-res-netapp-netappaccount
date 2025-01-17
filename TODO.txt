@@ -1,4 +1,3 @@
 - cmk 
-- telem in child modules
 - docs generation and tidy
 

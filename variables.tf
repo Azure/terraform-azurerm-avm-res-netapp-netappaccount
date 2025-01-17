@@ -204,7 +204,6 @@ variable "capacity_pools" {
       delegated_managed_identity_resource_id = optional(string, null)
       principal_type                         = optional(string, null)
     })))
-    enable_telemetry = optional(bool, true)
   }))
   default     = {}
   description = <<DESCRIPTION
@@ -222,7 +221,6 @@ variable "capacity_pools" {
   - `read` - (Defaults to 5 minutes) Used when retrieving the Capacity Pool.
   - `update` - (Defaults to 30 minutes) Used when updating the Capacity Pool.
 - `role_assignments` - (Optional) A map of role assignments to create on this resource. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
-- `enable_telemetry` - (Optional) If set to `false`, telemetry will not be collected for the resource. Default is `true`.
 
 DESCRIPTION
 
@@ -292,7 +290,6 @@ variable "backup_vaults" {
   type = map(object({
     name             = string
     tags             = optional(map(string))
-    enable_telemetry = optional(bool, true)
   }))
   default     = {}
   description = <<DESCRIPTION
@@ -314,7 +311,6 @@ variable "backup_policies" {
     daily_backups_to_keep   = optional(number, 2)
     weekly_backups_to_keep  = optional(number, 1)
     monthly_backups_to_keep = optional(number, 1)
-    enable_telemetry        = optional(bool, true)
   }))
   default     = {}
   description = <<DESCRIPTION
@@ -328,7 +324,6 @@ The map key is deliberately arbitrary to avoid issues where map keys maybe unkno
 - `daily_backups_to_keep` - (Optional) The number of daily backups to keep. Defaults to `2`.
 - `weekly_backups_to_keep` - (Optional) The number of weekly backups to keep. Defaults to `1`.
 - `monthly_backups_to_keep` - (Optional) The number of monthly backups to keep. Defaults to `1`.
-- `enable_telemetry` - (Optional) If set to `false`, telemetry will not be collected for the resource. Default is `true`.
 
 DESCRIPTION
 }
@@ -359,7 +354,6 @@ variable "snapshot_policies" {
       hour              = number
       minute            = number
     }))
-    enable_telemetry = optional(bool, true)
   }))
   default     = {}
   description = <<DESCRIPTION
@@ -387,7 +381,6 @@ The map key is deliberately arbitrary to avoid issues where map keys maybe unkno
   - `days_of_month` - A list of the days of the month to take the snapshot. Must be between 1 and 31.
   - `hour` - The hour of the day to take the snapshot. Must be between 0 and 23.
   - `minute` - The minute of the hour to take the snapshot. Must be between 0 and 59.
-- `enable_telemetry` - (Optional) If set to `false`, telemetry will not be collected for the resource. Default is `true`.
 
 DESCRIPTION
 }
@@ -451,7 +444,6 @@ variable "volumes" {
     volume_spec_name                       = optional(string)
     volume_type                            = optional(string, "")
     zone                                   = optional(number)
-    enable_telemetry                       = optional(bool, true)
   }))
   default = {}
 
@@ -525,7 +517,6 @@ The map key is deliberately arbitrary to avoid issues where map keys maybe unkno
 - `volume_spec_name` - (Optional) Volume spec name is the application specific designation or identifier for the particular volume in a volume group for e.g. `data`, `log`. Default is `null`.
 - `volume_type` - (Optional) What type of volume is this. For destination volumes in Cross Region Replication, set type to `DataProtection`. Default is `null`.
 - `zone` - (Optional) The number of the availability zone where the volume should be created. Possible values are `1`, `2`, `3` or `null`. Default is `null`.
-- `enable_telemetry` - (Optional) If set to `false`, telemetry will not be collected for the resource. Default is `true`.
 
 DESCRIPTION
 }
