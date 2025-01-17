@@ -288,8 +288,8 @@ DESCRIPTION
 
 variable "backup_vaults" {
   type = map(object({
-    name             = string
-    tags             = optional(map(string))
+    name = string
+    tags = optional(map(string))
   }))
   default     = {}
   description = <<DESCRIPTION
