@@ -251,7 +251,7 @@ variable "active_directories" {
   }))
   default     = {}
   description = <<DESCRIPTION
-(Optional) A map of Active Directory connections to create on the ANF Account.
+(Optional) A map of Active Directory connections to create on the Azure Netapp Files Account.
 
 The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
 
@@ -288,7 +288,7 @@ variable "backup_vaults" {
   }))
   default     = {}
   description = <<DESCRIPTION
-(Optional) A map of backup vaults to create on the ANF Account.
+(Optional) A map of backup vaults to create on the Azure Netapp Files Account.
 
 The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
 
@@ -309,7 +309,7 @@ variable "backup_policies" {
   }))
   default     = {}
   description = <<DESCRIPTION
-(Optional) A map of backup policies to create on the ANF Account.
+(Optional) A map of backup policies to create on the Azure Netapp Files Account.
 
 The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
 
@@ -352,7 +352,7 @@ variable "snapshot_policies" {
   }))
   default     = {}
   description = <<DESCRIPTION
-(Optional) A map of snapshot policies to create on the ANF Account.
+(Optional) A map of snapshot policies to create on the Azure Netapp Files Account.
 
 The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
 
@@ -444,7 +444,7 @@ variable "volumes" {
 
   description = <<DESCRIPTION
 
-(Optional) A map of volumes to create in the ANF account capacity pool specified by the `capacity_pool_map_key`. 
+(Optional) A map of volumes to create in the Azure Netapp Files account capacity pool specified by the `capacity_pool_map_key`. 
 
 > The capacity pool must be specified in the `capacity_pools` variable of this module. If it is not, then please call the volume child module directly to create a volume on a capacity pool managed outside of this module.
 
