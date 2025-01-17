@@ -16,5 +16,9 @@ resource "azapi_resource" "anf-capacity-pool" {
     }
   }
 
+  retry = {
+    error_message_regex = ["CannotDeleteResource"]
+  }
+
   schema_validation_enabled = false
 }

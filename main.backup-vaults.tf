@@ -7,5 +7,5 @@ module "backup-vaults" {
   location = var.location
 
   name = each.value.name
-  tags = each.value.tags
+  tags = each.value.tags == null ? var.inherit_tags_from_parent_resource == true ? var.tags : null : each.value.tags
 }

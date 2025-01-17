@@ -46,6 +46,7 @@ resource "azapi_resource" "anf-account" {
       # encryption = {}
     }
   }
+
   retry = {
     error_message_regex = ["CannotDeleteResource"]
   }

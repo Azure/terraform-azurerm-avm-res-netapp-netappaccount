@@ -7,7 +7,7 @@ module "backup-policies" {
   location = var.location
 
   name    = each.value.name
-  tags    = each.value.tags
+  tags    = each.value.tags == null ? var.inherit_tags_from_parent_resource == true ? var.tags : null : each.value.tags
   enabled = each.value.enabled
 
   daily_backups_to_keep   = each.value.daily_backups_to_keep

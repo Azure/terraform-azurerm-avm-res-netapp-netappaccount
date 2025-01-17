@@ -166,11 +166,16 @@ DESCRIPTION
   nullable    = false
 }
 
-# tflint-ignore: terraform_unused_declarations
 variable "tags" {
   type        = map(string)
   default     = null
   description = "(Optional) Tags of the resource."
+}
+
+variable "inherit_tags_from_parent_resource" {
+  type        = bool
+  default     = true
+  description = "(Optional) If set to `true`, the resource will inherit tags from the parent resource, the Azure NetApp Files Account, which tags are specified via `var.tags`. Default is `true`."
 }
 
 # Capacity Pools
@@ -283,7 +288,7 @@ DESCRIPTION
 variable "backup_vaults" {
   type = map(object({
     name = string
-    tags = optional(map(string), null)
+    tags = optional(map(string))
 
   }))
   default     = {}
@@ -301,7 +306,7 @@ DESCRIPTION
 variable "backup_policies" {
   type = map(object({
     name                    = string
-    tags                    = optional(map(string), null)
+    tags                    = optional(map(string))
     enabled                 = optional(bool, true)
     daily_backups_to_keep   = optional(number, 2)
     weekly_backups_to_keep  = optional(number, 1)
@@ -326,7 +331,7 @@ DESCRIPTION
 variable "snapshot_policies" {
   type = map(object({
     name    = string
-    tags    = optional(map(string), null)
+    tags    = optional(map(string))
     enabled = optional(bool, true)
     hourly_schedule = optional(object({
       snapshots_to_keep = number
@@ -405,8 +410,8 @@ variable "volumes" {
       allowed_clients = list(string)
       chown_mode      = optional(string)
       cifs            = optional(bool)
-      nfsv3          = optional(bool)
-      nfsv41         = optional(bool)
+      nfsv3           = optional(bool)
+      nfsv41          = optional(bool)
       has_root_access = optional(bool)
       kerberos5i_ro   = optional(bool)
       kerberos5i_rw   = optional(bool)
@@ -423,22 +428,22 @@ variable "volumes" {
     kerberos_enabled                       = optional(bool, false)
     ldap_enabled                           = optional(bool, false)
     network_features                       = optional(string, "Standard")
-    protocol_types                        = optional(set(string), ["NFSv3"])
-    proximity_placement_group_resource_id = optional(string)
-    security_style                        = optional(string)
-    service_level                         = optional(string, "Standard")
-    smb_access_based_enumeration_enabled  = optional(bool)
-    smb_continuously_available            = optional(bool, false)
-    smb_encryption                        = optional(bool, false)
-    smb_non_browsable                     = optional(bool)
-    snapshot_directory_visible            = optional(bool, true)
-    snapshot_policy_map_key               = optional(string)
-    throughput_mibps                      = optional(number)
-    unix_permissions                      = optional(string, "0770")
-    volume_size_in_gib                    = optional(number, 50)
-    volume_spec_name                      = optional(string)
-    volume_type                           = optional(string, "")
-    zone                                  = optional(number)
+    protocol_types                         = optional(set(string), ["NFSv3"])
+    proximity_placement_group_resource_id  = optional(string)
+    security_style                         = optional(string)
+    service_level                          = optional(string, "Standard")
+    smb_access_based_enumeration_enabled   = optional(bool)
+    smb_continuously_available             = optional(bool, false)
+    smb_encryption                         = optional(bool, false)
+    smb_non_browsable                      = optional(bool)
+    snapshot_directory_visible             = optional(bool, true)
+    snapshot_policy_map_key                = optional(string)
+    throughput_mibps                       = optional(number)
+    unix_permissions                       = optional(string, "0770")
+    volume_size_in_gib                     = optional(number, 50)
+    volume_spec_name                       = optional(string)
+    volume_type                            = optional(string, "")
+    zone                                   = optional(number)
   }))
   default = {}
 

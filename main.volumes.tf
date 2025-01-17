@@ -5,7 +5,7 @@ module "volumes" {
 
   name     = each.value.name
   location = var.location
-  tags     = each.value.tags
+  tags     = each.value.tags == null ? var.inherit_tags_from_parent_resource == true ? var.tags : null : each.value.tags
 
   capacity_pool_resource_id = module.capacity-pools[each.value.capacity_pool_map_key].resource_id
   subnet_resource_id        = each.value.subnet_resource_id

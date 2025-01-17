@@ -7,9 +7,9 @@ module "capacity-pools" {
   location = var.location
 
   name            = each.value.name
+  tags            = each.value.tags == null ? var.inherit_tags_from_parent_resource == true ? var.tags : null : each.value.tags
   size            = each.value.size
   service_level   = each.value.service_level
-  tags            = each.value.tags
   qos_type        = each.value.qos_type
   encryption_type = each.value.encryption_type
   cool_access     = each.value.cool_access

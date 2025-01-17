@@ -108,6 +108,10 @@ module "test" {
   location            = azapi_resource.rsg.location
   resource_group_name = azapi_resource.rsg.name
 
+  tags = {
+    environment = "test"
+  }
+
   capacity_pools = {
     "pool1" = {
       name          = "pool1"
@@ -126,32 +130,32 @@ module "test" {
   backup_vaults = {
     "backup-vault-1" = {
       name = "backup-vault-1"
-      tags = {
-        environment = "prod"
-      }
+      # tags = {
+      #   environment = "prod"
+      # }
     }
     "backup-vault-2" = {
       name = "backup-vault-2"
-      tags = {
-        environment = "test"
-      }
+      # tags = {
+      #   environment = "test"
+      # }
     }
   }
 
   backup_policies = {
     "backup-policy-1" = {
       name = "backup-policy-1"
-      tags = {
-        environment   = "prod"
-        configuration = "defaults"
-      }
+      # tags = {
+      #   environment   = "prod"
+      #   configuration = "defaults"
+      # }
     }
     "backup-policy-2" = {
       name = "backup-policy-2"
-      tags = {
-        environment   = "test"
-        configuration = "custom"
-      }
+      # tags = {
+      #   environment   = "test"
+      #   configuration = "custom"
+      # }
       daily_backups_to_keep   = 7
       weekly_backups_to_keep  = 4
       monthly_backups_to_keep = 6
@@ -161,9 +165,9 @@ module "test" {
   snapshot_policies = {
     "snap-pol-1" = {
       name = "snap-pol-1"
-      tags = {
-        configuration = "all"
-      }
+      # tags = {
+      #   configuration = "all"
+      # }
       hourly_schedule = {
         snapshots_to_keep = 8
         minute            = 0
@@ -188,9 +192,9 @@ module "test" {
     }
     "snap-pol-2" = {
       name = "snap-pol-2"
-      tags = {
-        configuration = "daily only"
-      }
+      # tags = {
+      #   configuration = "daily only"
+      # }
       hourly_schedule = {
         snapshots_to_keep = 8
         minute            = 0
