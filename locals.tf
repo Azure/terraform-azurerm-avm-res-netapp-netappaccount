@@ -1,6 +1,7 @@
 locals {
   role_definition_resource_substring = "/providers/Microsoft.Authorization/roleDefinitions"
   subscription_id                    = coalesce(var.subscription_id, data.azapi_client_config.this.subscription_id)
+  cmk_key_vault_uri                  = var.customer_managed_key != null ? concat("https://", split("/", var.customer_managed_key.key_vault_resource_id)[8], ".vault.azure.net") : null
 }
 
 locals {
