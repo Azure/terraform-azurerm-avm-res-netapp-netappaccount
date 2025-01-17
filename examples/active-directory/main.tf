@@ -72,12 +72,36 @@ module "test" {
 
   active_directories = {
     ad1 = {
-      adds_domain                       = "adds-test.local"
-      dns_servers                       = ["10.99.255.4"]
-      adds_site_name                    = "Azure-UKS"
-      smb_server_name                   = "anf-acc-1"
-      adds_admin_user_name              = "jtracey01@adds-test.local"
-      adds_admin_password               = var.adds_admin_password
+      adds_domain          = "adds-test.local"
+      dns_servers          = ["10.99.255.4"]
+      adds_site_name       = "Azure-UKS"
+      smb_server_name      = "anf-acc-1"
+      adds_admin_user_name = "jtracey01@adds-test.local"
+      adds_admin_password  = var.adds_admin_password
     }
   }
+}
+
+output "anf_account_resource_id" {
+  value = module.test.resource_id
+}
+
+output "anf_account_name" {
+  value = module.test.name
+}
+
+output "backup_vaults_resource_ids" {
+  value = module.test.backup_vaults_resource_ids
+}
+
+output "backup_policies_resource_ids" {
+  value = module.test.backup_policies_resource_ids
+}
+
+output "snapshot_policies_resource_ids" {
+  value = module.test.snapshot_policies_resource_ids
+}
+
+output "volumes_resource_ids" {
+  value = module.test.volumes_resource_ids
 }
