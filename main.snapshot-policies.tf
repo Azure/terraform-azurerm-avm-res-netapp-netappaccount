@@ -14,4 +14,5 @@ module "snapshot-policies" {
   hourly_schedule  = each.value.hourly_schedule
   monthly_schedule = each.value.monthly_schedule
   weekly_schedule  = each.value.weekly_schedule
+  enable_telemetry = var.enable_telemetry
 }

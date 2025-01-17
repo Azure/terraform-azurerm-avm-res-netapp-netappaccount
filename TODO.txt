@@ -1,4 +1,4 @@
 - cmk 
 - telem in child modules
-- convert snapshot-policy teneray to var optionals with defaults
+- docs generation and tidy
 

@@ -46,4 +46,5 @@ module "volumes" {
   volume_spec_name                       = each.value.volume_spec_name
   volume_type                            = each.value.volume_type
   zone                                   = each.value.zone
+  enable_telemetry                       = var.enable_telemetry
 }
