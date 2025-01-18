@@ -18,7 +18,7 @@ The following requirements are needed by this module:
 
 The following resources are used by this module:
 
-- [azapi_resource.anf-account](https://registry.terraform.io/providers/azure/azapi/latest/docs/resources/resource) (resource)
+- [azapi_resource.anf_account](https://registry.terraform.io/providers/azure/azapi/latest/docs/resources/resource) (resource)
 - [azapi_resource.anf_account_lock](https://registry.terraform.io/providers/azure/azapi/latest/docs/resources/resource) (resource)
 - [azapi_resource.name](https://registry.terraform.io/providers/azure/azapi/latest/docs/resources/resource) (resource)
 - [modtm_telemetry.telemetry](https://registry.terraform.io/providers/azure/modtm/latest/docs/resources/telemetry) (resource)
@@ -444,7 +444,6 @@ The map key is deliberately arbitrary to avoid issues where map keys maybe unkno
   - unix\_ro         - (Optional) Specifies whether UNIX read-only is allowed.
   - unix\_rw         - (Optional) Specifies whether UNIX read-write is allowed.
 - `key_vault_private_endpoint_resource_id` - (Optional) The Azure Resource ID of the Private Endpoint to access the required Key Vault. Required if `encryption_key_source` is set to `Microsoft.KeyVault`. Default is `null`. Example: `/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg1/providers/Microsoft.Network/privateEndpoints/pep-kvlt-001`.
-- `encryption_type` - (Optional) Specifies the encryption type of the volume. Possible values are `Single` or `Double`. Default is `Single`.
 - `is_large_volume` - (Optional) Specifies whether the volume is a large volume. Default is `false`.
 - `kerberos_enabled` - (Optional) Specifies whether Kerberos is enabled for the volume. Default is `false`.
 - `ldap_enabled` - (Optional) Specifies whether LDAP is enabled for the volume. Default is `false`.
@@ -506,7 +505,6 @@ map(object({
       unix_rw         = optional(bool)
     })))
     key_vault_private_endpoint_resource_id = optional(string)
-    encryption_type                        = optional(string, "Single")
     is_large_volume                        = optional(bool, false)
     kerberos_enabled                       = optional(bool, false)
     ldap_enabled                           = optional(bool, false)
@@ -570,19 +568,19 @@ Source: ./modules/backup-policy
 
 Version:
 
-### <a name="module_backup_vaults"></a> [backup_vaults](#module\_backup_vaults)
+### <a name="module_backup_vaults"></a> [backup\_vaults](#module\_backup\_vaults)
 
 Source: ./modules/backup-vault
 
 Version:
 
-### <a name="module_capacity_pools"></a> [capacity_pools](#module\_capacity_pools)
+### <a name="module_capacity_pools"></a> [capacity\_pools](#module\_capacity\_pools)
 
-Source: ./modules/capacity_pool
+Source: ./modules/capacity-pool
 
 Version:
 
-### <a name="module_snapshot_policies"></a> [snapshot_policies](#module\_snapshot_policies)
+### <a name="module_snapshot_policies"></a> [snapshot\_policies](#module\_snapshot\_policies)
 
 Source: ./modules/snapshot-policy
 

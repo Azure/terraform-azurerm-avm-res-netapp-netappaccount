@@ -14,6 +14,8 @@ The following requirements are needed by this module:
 
 - <a name="requirement_modtm"></a> [modtm](#requirement\_modtm) (~> 0.3)
 
+- <a name="requirement_random"></a> [random](#requirement\_random) (~> 3.5)
+
 ## Resources
 
 The following resources are used by this module:
@@ -178,14 +180,6 @@ Description: (Optional) Source of key used to encrypt data in volume. Applicable
 Type: `string`
 
 Default: `"Microsoft.NetApp"`
-
-### <a name="input_encryption_type"></a> [encryption\_type](#input\_encryption\_type)
-
-Description: (Optional) Specifies the encryption type of the volume. Possible values are `Single` or `Double`. Default is `Single`.
-
-Type: `string`
-
-Default: `"Single"`
 
 ### <a name="input_export_policy_rules"></a> [export\_policy\_rules](#input\_export\_policy\_rules)
 
