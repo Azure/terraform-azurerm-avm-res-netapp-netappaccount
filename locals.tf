@@ -3,8 +3,7 @@ locals {
   role_definition_id_principal_and_definition_uuidv5 = var.role_assignments != null ? {
     for k, v in var.role_assignments : k => uuidv5(v.principal_id, v.role_definition_id)
   } : {}
-  role_definition_resource_substring = "/providers/Microsoft.Authorization/roleDefinitions"
-  subscription_id                    = coalesce(var.subscription_id, data.azapi_client_config.this.subscription_id)
+  subscription_id = coalesce(var.subscription_id, data.azapi_client_config.this.subscription_id)
 }
 
 locals {
