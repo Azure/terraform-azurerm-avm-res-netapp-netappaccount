@@ -46,7 +46,7 @@ resource "azapi_resource" "anf-account" {
 
       encryption = var.customer_managed_key != null ? {
         identity = {
-          userAssignedIdentity = var.customer_managed_key.user_assigned_identity
+          userAssignedIdentity = var.customer_managed_key.user_assigned_identity.resource_id
         }
         keySource = "Microsoft.KeyVault"
         keyVaultProperties = {
