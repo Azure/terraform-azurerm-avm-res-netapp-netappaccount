@@ -14,6 +14,8 @@ The following requirements are needed by this module:
 
 - <a name="requirement_modtm"></a> [modtm](#requirement\_modtm) (~> 0.3)
 
+- <a name="requirement_random"></a> [random](#requirement\_random) (~> 3.5)
+
 ## Resources
 
 The following resources are used by this module:
@@ -562,7 +564,7 @@ Description: The Resource IDs of the Azure Netapp Files Volumes in a map alongsi
 
 The following Modules are called:
 
-### <a name="module_backup-policies"></a> [backup-policies](#module\_backup-policies)
+### <a name="module_backup_policies"></a> [backup\_policies](#module\_backup\_policies)
 
 Source: ./modules/backup-policy
 

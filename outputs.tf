@@ -1,6 +1,6 @@
 output "backup_policies_resource_ids" {
   description = "The Resource IDs of the Azure Netapp Files Account Backup Policies in a map alongside the map key specified in `var.backup_policies`"
-  value       = { for key, value in var.backup_policies : key => module.backup-policies[key].resource_id }
+  value       = { for key, value in var.backup_policies : key => module.backup_policies[key].resource_id }
 }
 
 output "backup_vaults_resource_ids" {

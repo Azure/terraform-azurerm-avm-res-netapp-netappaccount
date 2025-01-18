@@ -12,7 +12,7 @@ module "volumes" {
 
   avs_data_store                         = each.value.avs_data_store
   backup_policy_enforced                 = each.value.backup_policy_enforced
-  backup_policy_resource_id              = each.value.backup_policy_map_key != null ? module.backup-policies[each.value.backup_policy_map_key].resource_id : null
+  backup_policy_resource_id              = each.value.backup_policy_map_key != null ? module.backup_policies[each.value.backup_policy_map_key].resource_id : null
   backup_vault_resource_id               = each.value.backup_vault_map_key != null ? module.backup_vaults[each.value.backup_vault_map_key].resource_id : null
   cool_access                            = each.value.cool_access
   cool_access_retrieval_policy           = each.value.cool_access_retrieval_policy

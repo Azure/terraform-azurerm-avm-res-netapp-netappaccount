@@ -1,4 +1,4 @@
-module "backup-policies" {
+module "backup_policies" {
   source = "./modules/backup-policy"
 
   for_each = var.backup_policies

@@ -172,7 +172,7 @@ DESCRIPTION
 
 # required AVM interfaces
 # remove only if not supported by the resource
-# tflint-ignore: terraform_unused_declarations
+# tflint-ignore: customer_managed_key
 variable "customer_managed_key" {
   type = object({
     key_vault_resource_id = string
@@ -247,6 +247,7 @@ DESCRIPTION
   nullable    = false
 }
 
+# tflint-ignore: role_assignments
 variable "role_assignments" {
   type = map(object({
     role_definition_id                     = string
