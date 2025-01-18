@@ -1,4 +1,4 @@
-resource "azapi_resource" "anf-capacity-pool" {
+resource "azapi_resource" "anf_capacity_pool" {
   type = "Microsoft.NetApp/netAppAccounts/capacityPools@2024-07-01"
   body = {
     properties = {

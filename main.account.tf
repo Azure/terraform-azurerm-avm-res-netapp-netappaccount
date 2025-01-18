@@ -1,6 +1,6 @@
 
 
-resource "azapi_resource" "anf-account" {
+resource "azapi_resource" "anf_account" {
   type = "Microsoft.NetApp/netAppAccounts@2024-07-01"
   body = {
     properties = {
@@ -67,7 +67,7 @@ resource "azapi_resource" "anf-account" {
   }
 }
 
-resource "azapi_resource" "anf-account-lock" {
+resource "azapi_resource" "anf_account_lock" {
   count = var.lock != null ? 1 : 0
 
   type = "Microsoft.Authorization/locks@2020-05-01"
@@ -78,5 +78,5 @@ resource "azapi_resource" "anf-account-lock" {
     }
   }
   name      = coalesce(var.lock.name, "lock-${var.lock.kind}")
-  parent_id = azapi_resource.anf-account.id
+  parent_id = azapi_resource.anf_account.id
 }

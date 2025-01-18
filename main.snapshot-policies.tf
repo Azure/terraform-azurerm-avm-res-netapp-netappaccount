@@ -1,9 +1,9 @@
-module "snapshot-policies" {
+module "snapshot_policies" {
   source = "./modules/snapshot-policy"
 
   for_each = var.snapshot_policies
 
-  account  = { resource_id = azapi_resource.anf-account.id }
+  account  = { resource_id = azapi_resource.anf_account.id }
   location = var.location
 
   name    = each.value.name

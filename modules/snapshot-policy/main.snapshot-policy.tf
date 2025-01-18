@@ -1,4 +1,4 @@
-resource "azapi_resource" "anf-snapshot-policy" {
+resource "azapi_resource" "anf_snapshot_policy" {
   type = "Microsoft.NetApp/netAppAccounts/snapshotPolicies@2024-07-01"
   body = {
     properties = {

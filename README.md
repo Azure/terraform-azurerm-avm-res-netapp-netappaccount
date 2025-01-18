@@ -19,7 +19,7 @@ The following requirements are needed by this module:
 The following resources are used by this module:
 
 - [azapi_resource.anf-account](https://registry.terraform.io/providers/azure/azapi/latest/docs/resources/resource) (resource)
-- [azapi_resource.anf-account-lock](https://registry.terraform.io/providers/azure/azapi/latest/docs/resources/resource) (resource)
+- [azapi_resource.anf_account_lock](https://registry.terraform.io/providers/azure/azapi/latest/docs/resources/resource) (resource)
 - [azapi_resource.name](https://registry.terraform.io/providers/azure/azapi/latest/docs/resources/resource) (resource)
 - [modtm_telemetry.telemetry](https://registry.terraform.io/providers/azure/modtm/latest/docs/resources/telemetry) (resource)
 - [random_uuid.telemetry](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/uuid) (resource)
@@ -570,19 +570,19 @@ Source: ./modules/backup-policy
 
 Version:
 
-### <a name="module_backup-vaults"></a> [backup-vaults](#module\_backup-vaults)
+### <a name="module_backup_vaults"></a> [backup_vaults](#module\_backup_vaults)
 
 Source: ./modules/backup-vault
 
 Version:
 
-### <a name="module_capacity-pools"></a> [capacity-pools](#module\_capacity-pools)
+### <a name="module_capacity_pools"></a> [capacity_pools](#module\_capacity_pools)
 
-Source: ./modules/capacity-pool
+Source: ./modules/capacity_pool
 
 Version:
 
-### <a name="module_snapshot-policies"></a> [snapshot-policies](#module\_snapshot-policies)
+### <a name="module_snapshot_policies"></a> [snapshot_policies](#module\_snapshot_policies)
 
 Source: ./modules/snapshot-policy
 

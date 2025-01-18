@@ -3,7 +3,7 @@ module "backup-policies" {
 
   for_each = var.backup_policies
 
-  account  = { resource_id = azapi_resource.anf-account.id }
+  account  = { resource_id = azapi_resource.anf_account.id }
   location = var.location
 
   name = each.value.name

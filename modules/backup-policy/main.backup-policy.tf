@@ -1,4 +1,4 @@
-resource "azapi_resource" "anf-backup-policy" {
+resource "azapi_resource" "anf_backup_policy" {
   type = "Microsoft.NetApp/netAppAccounts/backupPolicies@2024-07-01"
   body = {
     properties = {

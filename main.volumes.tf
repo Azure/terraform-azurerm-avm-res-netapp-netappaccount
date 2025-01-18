@@ -7,13 +7,13 @@ module "volumes" {
   location = var.location
   tags     = each.value.tags == null ? var.inherit_tags_from_parent_resource == true ? var.tags : null : each.value.tags
 
-  capacity_pool_resource_id = module.capacity-pools[each.value.capacity_pool_map_key].resource_id
+  capacity_pool_resource_id = module.capacity_pools[each.value.capacity_pool_map_key].resource_id
   subnet_resource_id        = each.value.subnet_resource_id
 
   avs_data_store                         = each.value.avs_data_store
   backup_policy_enforced                 = each.value.backup_policy_enforced
   backup_policy_resource_id              = each.value.backup_policy_map_key != null ? module.backup-policies[each.value.backup_policy_map_key].resource_id : null
-  backup_vault_resource_id               = each.value.backup_vault_map_key != null ? module.backup-vaults[each.value.backup_vault_map_key].resource_id : null
+  backup_vault_resource_id               = each.value.backup_vault_map_key != null ? module.backup_vaults[each.value.backup_vault_map_key].resource_id : null
   cool_access                            = each.value.cool_access
   cool_access_retrieval_policy           = each.value.cool_access_retrieval_policy
   coolness_period                        = each.value.coolness_period
@@ -25,7 +25,6 @@ module "volumes" {
   encryption_key_source                  = each.value.encryption_key_source
   export_policy_rules                    = each.value.export_policy_rules
   key_vault_private_endpoint_resource_id = each.value.key_vault_private_endpoint_resource_id
-  encryption_type                        = each.value.encryption_type
   is_large_volume                        = each.value.is_large_volume
   kerberos_enabled                       = each.value.kerberos_enabled
   ldap_enabled                           = each.value.ldap_enabled
@@ -39,7 +38,7 @@ module "volumes" {
   smb_encryption                         = each.value.smb_encryption
   smb_non_browsable                      = each.value.smb_non_browsable
   snapshot_directory_visible             = each.value.snapshot_directory_visible
-  snapshot_policy_resource_id            = each.value.snapshot_policy_map_key != null ? module.snapshot-policies[each.value.snapshot_policy_map_key].resource_id : null
+  snapshot_policy_resource_id            = each.value.snapshot_policy_map_key != null ? module.snapshot_policies[each.value.snapshot_policy_map_key].resource_id : null
   throughput_mibps                       = each.value.throughput_mibps
   unix_permissions                       = each.value.unix_permissions
   volume_size_in_gib                     = each.value.volume_size_in_gib

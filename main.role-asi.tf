@@ -14,6 +14,6 @@ resource "azapi_resource" "name" {
     }
   }
   name      = uuidv5("oid", local.role_definition_id_principal_and_definition_uuidv5[each.key])
-  parent_id = azapi_resource.anf-account.id
+  parent_id = azapi_resource.anf_account.id
 }
 

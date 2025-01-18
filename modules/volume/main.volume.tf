@@ -1,4 +1,4 @@
-resource "azapi_resource" "anf-capacity-pool-volume" {
+resource "azapi_resource" "anf_capacity_pool_volume" {
   type = "Microsoft.NetApp/netAppAccounts/capacityPools/volumes@2024-07-01"
   body = {
     zones = var.zone

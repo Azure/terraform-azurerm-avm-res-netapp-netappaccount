@@ -1,9 +1,9 @@
-module "backup-vaults" {
+module "backup_vaults" {
   source = "./modules/backup-vault"
 
   for_each = var.backup_vaults
 
-  account  = { resource_id = azapi_resource.anf-account.id }
+  account  = { resource_id = azapi_resource.anf_account.id }
   location = var.location
 
   name             = each.value.name

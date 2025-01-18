@@ -380,7 +380,6 @@ variable "volumes" {
       unix_rw         = optional(bool)
     })))
     key_vault_private_endpoint_resource_id = optional(string)
-    encryption_type                        = optional(string, "Single")
     is_large_volume                        = optional(bool, false)
     kerberos_enabled                       = optional(bool, false)
     ldap_enabled                           = optional(bool, false)
@@ -452,7 +451,6 @@ The map key is deliberately arbitrary to avoid issues where map keys maybe unkno
   - unix_ro         - (Optional) Specifies whether UNIX read-only is allowed.
   - unix_rw         - (Optional) Specifies whether UNIX read-write is allowed.
 - `key_vault_private_endpoint_resource_id` - (Optional) The Azure Resource ID of the Private Endpoint to access the required Key Vault. Required if `encryption_key_source` is set to `Microsoft.KeyVault`. Default is `null`. Example: `/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg1/providers/Microsoft.Network/privateEndpoints/pep-kvlt-001`.
-- `encryption_type` - (Optional) Specifies the encryption type of the volume. Possible values are `Single` or `Double`. Default is `Single`.
 - `is_large_volume` - (Optional) Specifies whether the volume is a large volume. Default is `false`.
 - `kerberos_enabled` - (Optional) Specifies whether Kerberos is enabled for the volume. Default is `false`.
 - `ldap_enabled` - (Optional) Specifies whether LDAP is enabled for the volume. Default is `false`.

@@ -1,4 +1,4 @@
-resource "azapi_resource" "anf-backup-vault" {
+resource "azapi_resource" "anf_backup_vault" {
   type                      = "Microsoft.NetApp/netAppAccounts/backupVaults@2024-07-01"
   location                  = var.location
   name                      = var.name

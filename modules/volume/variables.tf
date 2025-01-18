@@ -160,17 +160,6 @@ variable "encryption_key_source" {
   }
 }
 
-variable "encryption_type" {
-  type        = string
-  default     = "Single"
-  description = "(Optional) Specifies the encryption type of the volume. Possible values are `Single` or `Double`. Default is `Single`."
-
-  validation {
-    condition     = can(regex("^(Single|Double)$", var.encryption_type))
-    error_message = "The encryption_type value must be either Single or Double."
-  }
-}
-
 variable "export_policy_rules" {
   type = map(object({
     rule_index      = number

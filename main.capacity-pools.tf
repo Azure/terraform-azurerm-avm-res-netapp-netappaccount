@@ -1,9 +1,9 @@
-module "capacity-pools" {
+module "capacity_pools" {
   source = "./modules/capacity-pool"
 
   for_each = var.capacity_pools
 
-  account  = { resource_id = azapi_resource.anf-account.id }
+  account  = { resource_id = azapi_resource.anf_account.id }
   location = var.location
 
   name             = each.value.name
