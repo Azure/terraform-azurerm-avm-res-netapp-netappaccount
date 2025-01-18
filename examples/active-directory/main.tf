@@ -50,7 +50,7 @@ resource "azapi_resource" "rsg" {
     properties = {}
   }
   location                  = random_shuffle.region.result[0]
-  name                      = "rsg-${random_shuffle.region.result[0]}-anf-example-default-${random_pet.name.id}"
+  name                      = "rsg-${random_shuffle.region.result[0]}-anf-example-adds-${random_pet.name.id}"
   schema_validation_enabled = false
 }
 
@@ -61,9 +61,20 @@ resource "azapi_resource" "rsg" {
 module "test" {
   source = "../../"
 
-  name                = "anf-account-example-default-${random_pet.name.id}"
+  name                = "anf-account-example-adds-${random_pet.name.id}"
   location            = azapi_resource.rsg.location
   resource_group_name = azapi_resource.rsg.name
+
+  active_directories = {
+    ad1 = {
+      adds_domain          = "adds-test.local"
+      dns_servers          = ["10.99.255.4"]
+      adds_site_name       = "Azure-UKS"
+      smb_server_name      = "anf-acc-1"
+      adds_admin_user_name = "jtracey01@adds-test.local"
+      adds_admin_password  = var.adds_admin_password
+    }
+  }
 }
 
 output "anf_account_resource_id" {

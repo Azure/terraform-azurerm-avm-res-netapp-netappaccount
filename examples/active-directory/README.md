@@ -1,7 +1,7 @@
 <!-- BEGIN_TF_DOCS -->
-# Default example
+# Active Directory example
 
-This deploys the module in its simplest form.
+This deploys an Azure NetApp Files account and makes a connection to an existing Active Directory domain.
 
 ```hcl
 terraform {
@@ -56,7 +56,7 @@ resource "azapi_resource" "rsg" {
     properties = {}
   }
   location                  = random_shuffle.region.result[0]
-  name                      = "rsg-${random_shuffle.region.result[0]}-anf-example-default-${random_pet.name.id}"
+  name                      = "rsg-${random_shuffle.region.result[0]}-anf-example-adds-${random_pet.name.id}"
   schema_validation_enabled = false
 }
 
@@ -67,9 +67,20 @@ resource "azapi_resource" "rsg" {
 module "test" {
   source = "../../"
 
-  name                = "anf-account-example-default-${random_pet.name.id}"
+  name                = "anf-account-example-adds-${random_pet.name.id}"
   location            = azapi_resource.rsg.location
   resource_group_name = azapi_resource.rsg.name
+
+  active_directories = {
+    ad1 = {
+      adds_domain          = "adds-test.local"
+      dns_servers          = ["10.99.255.4"]
+      adds_site_name       = "Azure-UKS"
+      smb_server_name      = "anf-acc-1"
+      adds_admin_user_name = "jtracey01@adds-test.local"
+      adds_admin_password  = var.adds_admin_password
+    }
+  }
 }
 
 output "anf_account_resource_id" {
@@ -120,7 +131,13 @@ The following resources are used by this module:
 <!-- markdownlint-disable MD013 -->
 ## Required Inputs
 
-No required inputs.
+The following input variables are required:
+
+### <a name="input_adds_admin_password"></a> [adds\_admin\_password](#input\_adds\_admin\_password)
+
+Description: The password for the Active Directory Domain Services (ADDS) admin user.
+
+Type: `string`
 
 ## Optional Inputs
 

@@ -1,7 +1,7 @@
 <!-- BEGIN_TF_DOCS -->
-# Default example
+# Combined example
 
-This deploys the module in its simplest form.
+This deploys an Azure NetApp Files volume with capacity pools, volumes, backup vaults, backup policies, and snapshots policies.
 
 ```hcl
 terraform {
@@ -28,7 +28,6 @@ module "regions" {
   version                   = "~> 0.3"
   availability_zones_filter = true
   geography_group_filter    = "Europe"
-
 }
 
 # This allows us to randomize the region for the resource group.
@@ -47,17 +46,50 @@ resource "random_shuffle" "region" {
 }
 ## End of section to provide a random Azure region for the resource group
 
-# This ensures we have unique CAF compliant names for our resources.
-
-# This is required for resource modules
 resource "azapi_resource" "rsg" {
   type = "Microsoft.Resources/resourceGroups@2024-03-01"
   body = {
     properties = {}
   }
   location                  = random_shuffle.region.result[0]
-  name                      = "rsg-${random_shuffle.region.result[0]}-anf-example-default-${random_pet.name.id}"
+  name                      = "rsg-${random_shuffle.region.result[0]}-anf-example-combined-${random_pet.name.id}"
   schema_validation_enabled = false
+}
+
+# vNet and Subnet
+resource "azapi_resource" "vnet" {
+  type = "Microsoft.Network/virtualNetworks@2024-05-01"
+  body = {
+    properties = {
+      addressSpace = {
+        addressPrefixes = [
+          "10.0.0.0/16"
+        ]
+      }
+      subnets = [
+        {
+          name = "subnet-anf-001"
+          properties = {
+            addressPrefix = "10.0.1.0/24"
+            delegations = [
+              {
+                name = "Microsoft.NetApp/volumes"
+                properties = {
+                  serviceName = "Microsoft.NetApp/volumes"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+  location  = azapi_resource.rsg.location
+  name      = "vnet-${random_shuffle.region.result[0]}-anf-example-combined-${random_pet.name.id}"
+  parent_id = azapi_resource.rsg.id
+  response_export_values = {
+    "anf_subnet_resource_id" = "properties.subnets[0].id"
+  }
 }
 
 # This is the module call
@@ -67,9 +99,146 @@ resource "azapi_resource" "rsg" {
 module "test" {
   source = "../../"
 
-  name                = "anf-account-example-default-${random_pet.name.id}"
+  name                = "anf-account-example-combined-${random_pet.name.id}"
   location            = azapi_resource.rsg.location
   resource_group_name = azapi_resource.rsg.name
+
+  tags = {
+    environment = "test"
+  }
+
+  capacity_pools = {
+    "pool1" = {
+      name          = "pool1"
+      size          = 4398046511104
+      service_level = "Premium"
+      tags = {
+        environment = "test"
+      }
+    }
+    "pool2" = {
+      name          = "pool2"
+      size          = 4398046511104
+      service_level = "Standard"
+      qos_type      = "Manual"
+      cool_access   = true
+      tags = {
+        environment = "prod"
+      }
+    }
+  }
+
+  backup_vaults = {
+    "backup-vault-1" = {
+      name = "backup-vault-1"
+      tags = {
+        environment = "prod"
+      }
+    }
+    "backup-vault-2" = {
+      name = "backup-vault-2"
+      tags = {
+        environment = "test"
+      }
+    }
+  }
+
+  backup_policies = {
+    "backup-policy-1" = {
+      name = "backup-policy-1"
+      tags = {
+        environment   = "prod"
+        configuration = "defaults"
+      }
+    }
+    "backup-policy-2" = {
+      name = "backup-policy-2"
+      tags = {
+        environment   = "test"
+        configuration = "custom"
+      }
+      daily_backups_to_keep   = 7
+      weekly_backups_to_keep  = 4
+      monthly_backups_to_keep = 6
+    }
+  }
+
+  snapshot_policies = {
+    "snap-pol-1" = {
+      name = "snap-pol-1"
+      tags = {
+        configuration = "all"
+      }
+      hourly_schedule = {
+        snapshots_to_keep = 8
+        minute            = 0
+      }
+      daily_schedule = {
+        snapshots_to_keep = 7
+        hour              = 0
+        minute            = 0
+      }
+      weekly_schedule = {
+        snapshots_to_keep = 2
+        day               = ["Monday", "Friday"]
+        minute            = 0
+        hour              = 0
+      }
+      monthly_schedule = {
+        snapshots_to_keep = 6
+        days_of_month     = [1, 30]
+        hour              = 0
+        minute            = 0
+      }
+    }
+    "snap-pol-2" = {
+      name = "snap-pol-2"
+      tags = {
+        configuration = "daily only"
+      }
+      hourly_schedule = {
+        snapshots_to_keep = 8
+        minute            = 0
+      }
+      weekly_schedule = {
+        snapshots_to_keep = 2
+        day               = ["Monday", "Friday"]
+        minute            = 0
+        hour              = 0
+      }
+    }
+  }
+
+  volumes = {
+    "volume-1" = {
+      name = "volume-1"
+      tags = {
+        environment = "test"
+      }
+      capacity_pool_map_key = "pool1"
+      subnet_resource_id    = azapi_resource.vnet.output.anf_subnet_resource_id
+      service_level         = "Premium"
+      export_policy_rules = {
+        "rule1" = {
+          rule_index      = 1
+          allowed_clients = ["0.0.0.0/0"]
+          chown_mode      = "Restricted"
+          cifs            = false
+          nfsv3           = true
+          nfsv41          = false
+          has_root_access = true
+          kerberos5i_ro   = false
+          kerberos5i_rw   = false
+          kerberos5p_ro   = false
+          kerberos5p_rw   = false
+          kerberos5_ro    = false
+          kerberos5_rw    = false
+          unix_ro         = false
+          unix_rw         = true
+        }
+      }
+    }
+  }
 }
 
 output "anf_account_resource_id" {
@@ -113,6 +282,7 @@ The following requirements are needed by this module:
 The following resources are used by this module:
 
 - [azapi_resource.rsg](https://registry.terraform.io/providers/azure/azapi/latest/docs/resources/resource) (resource)
+- [azapi_resource.vnet](https://registry.terraform.io/providers/azure/azapi/latest/docs/resources/resource) (resource)
 - [random_integer.region_index](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/integer) (resource)
 - [random_pet.name](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/pet) (resource)
 - [random_shuffle.region](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/shuffle) (resource)

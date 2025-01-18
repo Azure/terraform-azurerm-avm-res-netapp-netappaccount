@@ -1,4 +1,11 @@
-# TODO: insert locals here.
+locals {
+  cmk_key_vault_uri = var.customer_managed_key != null ? concat("https://", split("/", var.customer_managed_key.key_vault_resource_id)[8], ".vault.azure.net") : null
+  role_definition_id_principal_and_definition_uuidv5 = var.role_assignments != null ? {
+    for k, v in var.role_assignments : k => uuidv5(v.principal_id, v.role_definition_id)
+  } : {}
+  subscription_id = coalesce(var.subscription_id, data.azapi_client_config.this.subscription_id)
+}
+
 locals {
   managed_identities = {
     system_assigned_user_assigned = (var.managed_identities.system_assigned || length(var.managed_identities.user_assigned_resource_ids) > 0) ? {
@@ -19,16 +26,4 @@ locals {
       }
     } : {}
   }
-  # Private endpoint application security group associations.
-  # We merge the nested maps from private endpoints and application security group associations into a single map.
-  private_endpoint_application_security_group_associations = { for assoc in flatten([
-    for pe_k, pe_v in var.private_endpoints : [
-      for asg_k, asg_v in pe_v.application_security_group_associations : {
-        asg_key         = asg_k
-        pe_key          = pe_k
-        asg_resource_id = asg_v
-      }
-    ]
-  ]) : "${assoc.pe_key}-${assoc.asg_key}" => assoc }
-  role_definition_resource_substring = "/providers/Microsoft.Authorization/roleDefinitions"
 }

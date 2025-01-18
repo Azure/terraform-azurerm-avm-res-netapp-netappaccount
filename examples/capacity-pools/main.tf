@@ -22,7 +22,6 @@ module "regions" {
   version                   = "~> 0.3"
   availability_zones_filter = true
   geography_group_filter    = "Europe"
-
 }
 
 # This allows us to randomize the region for the resource group.
@@ -50,7 +49,7 @@ resource "azapi_resource" "rsg" {
     properties = {}
   }
   location                  = random_shuffle.region.result[0]
-  name                      = "rsg-${random_shuffle.region.result[0]}-anf-example-default-${random_pet.name.id}"
+  name                      = "rsg-${random_shuffle.region.result[0]}-anf-example-cap-pool-${random_pet.name.id}"
   schema_validation_enabled = false
 }
 
@@ -61,9 +60,23 @@ resource "azapi_resource" "rsg" {
 module "test" {
   source = "../../"
 
-  name                = "anf-account-example-default-${random_pet.name.id}"
+  name                = "anf-account-example-cap-pool-${random_pet.name.id}"
   location            = azapi_resource.rsg.location
   resource_group_name = azapi_resource.rsg.name
+  capacity_pools = {
+    "pool1" = {
+      name          = "pool1"
+      size          = 4398046511104
+      service_level = "Premium"
+    }
+    "pool2" = {
+      name          = "pool2"
+      size          = 4398046511104
+      service_level = "Standard"
+      qos_type      = "Manual"
+      cool_access   = true
+    }
+  }
 }
 
 output "anf_account_resource_id" {

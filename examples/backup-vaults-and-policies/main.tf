@@ -50,7 +50,7 @@ resource "azapi_resource" "rsg" {
     properties = {}
   }
   location                  = random_shuffle.region.result[0]
-  name                      = "rsg-${random_shuffle.region.result[0]}-anf-example-default-${random_pet.name.id}"
+  name                      = "rsg-${random_shuffle.region.result[0]}-anf-example-backup-vlt-and-pol-${random_pet.name.id}"
   schema_validation_enabled = false
 }
 
@@ -61,9 +61,42 @@ resource "azapi_resource" "rsg" {
 module "test" {
   source = "../../"
 
-  name                = "anf-account-example-default-${random_pet.name.id}"
+  name                = "anf-account-example-backup-vlt-${random_pet.name.id}"
   location            = azapi_resource.rsg.location
   resource_group_name = azapi_resource.rsg.name
+  backup_vaults = {
+    "backup-vault-1" = {
+      name = "backup-vault-1"
+      tags = {
+        environment = "prod"
+      }
+    }
+    "backup-vault-2" = {
+      name = "backup-vault-2"
+      tags = {
+        environment = "test"
+      }
+    }
+  }
+  backup_policies = {
+    "backup-policy-1" = {
+      name = "backup-policy-1"
+      tags = {
+        environment   = "prod"
+        configuration = "defaults"
+      }
+    }
+    "backup-policy-2" = {
+      name = "backup-policy-2"
+      tags = {
+        environment   = "test"
+        configuration = "custom"
+      }
+      daily_backups_to_keep   = 7
+      weekly_backups_to_keep  = 4
+      monthly_backups_to_keep = 6
+    }
+  }
 }
 
 output "anf_account_resource_id" {

@@ -1,7 +1,7 @@
 <!-- BEGIN_TF_DOCS -->
-# Default example
+# Snapshot Policies
 
-This deploys the module in its simplest form.
+This deploys the with snapshot policies in an Azure NetApp Files account.
 
 ```hcl
 terraform {
@@ -56,7 +56,7 @@ resource "azapi_resource" "rsg" {
     properties = {}
   }
   location                  = random_shuffle.region.result[0]
-  name                      = "rsg-${random_shuffle.region.result[0]}-anf-example-default-${random_pet.name.id}"
+  name                      = "rsg-${random_shuffle.region.result[0]}-anf-example-snapshot-pol-${random_pet.name.id}"
   schema_validation_enabled = false
 }
 
@@ -67,33 +67,54 @@ resource "azapi_resource" "rsg" {
 module "test" {
   source = "../../"
 
-  name                = "anf-account-example-default-${random_pet.name.id}"
+  name                = "anf-account-example-backup-vlt-${random_pet.name.id}"
   location            = azapi_resource.rsg.location
   resource_group_name = azapi_resource.rsg.name
-}
-
-output "anf_account_resource_id" {
-  value = module.test.resource_id
-}
-
-output "anf_account_name" {
-  value = module.test.name
-}
-
-output "backup_vaults_resource_ids" {
-  value = module.test.backup_vaults_resource_ids
-}
-
-output "backup_policies_resource_ids" {
-  value = module.test.backup_policies_resource_ids
-}
-
-output "snapshot_policies_resource_ids" {
-  value = module.test.snapshot_policies_resource_ids
-}
-
-output "volumes_resource_ids" {
-  value = module.test.volumes_resource_ids
+  snapshot_policies = {
+    "snap-pol-1" = {
+      name = "snap-pol-1"
+      tags = {
+        configuration = "all"
+      }
+      hourly_schedule = {
+        snapshots_to_keep = 8
+        minute            = 0
+      }
+      daily_schedule = {
+        snapshots_to_keep = 7
+        hour              = 0
+        minute            = 0
+      }
+      weekly_schedule = {
+        snapshots_to_keep = 2
+        day               = ["Monday", "Friday"]
+        minute            = 0
+        hour              = 0
+      }
+      monthly_schedule = {
+        snapshots_to_keep = 6
+        days_of_month     = [1, 30]
+        hour              = 0
+        minute            = 0
+      }
+    }
+    "snap-pol-2" = {
+      name = "snap-pol-2"
+      tags = {
+        configuration = "daily only"
+      }
+      hourly_schedule = {
+        snapshots_to_keep = 8
+        minute            = 0
+      }
+      weekly_schedule = {
+        snapshots_to_keep = 2
+        day               = ["Monday", "Friday"]
+        minute            = 0
+        hour              = 0
+      }
+    }
+  }
 }
 ```
 
@@ -128,31 +149,7 @@ No optional inputs.
 
 ## Outputs
 
-The following outputs are exported:
-
-### <a name="output_anf_account_name"></a> [anf\_account\_name](#output\_anf\_account\_name)
-
-Description: n/a
-
-### <a name="output_anf_account_resource_id"></a> [anf\_account\_resource\_id](#output\_anf\_account\_resource\_id)
-
-Description: n/a
-
-### <a name="output_backup_policies_resource_ids"></a> [backup\_policies\_resource\_ids](#output\_backup\_policies\_resource\_ids)
-
-Description: n/a
-
-### <a name="output_backup_vaults_resource_ids"></a> [backup\_vaults\_resource\_ids](#output\_backup\_vaults\_resource\_ids)
-
-Description: n/a
-
-### <a name="output_snapshot_policies_resource_ids"></a> [snapshot\_policies\_resource\_ids](#output\_snapshot\_policies\_resource\_ids)
-
-Description: n/a
-
-### <a name="output_volumes_resource_ids"></a> [volumes\_resource\_ids](#output\_volumes\_resource\_ids)
-
-Description: n/a
+No outputs.
 
 ## Modules
 
