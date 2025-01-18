@@ -48,13 +48,17 @@ resource "azapi_resource" "anf-account" {
         identity = {
           userAssignedIdentity = var.customer_managed_key.user_assigned_identity.resource_id
         }
-        keySource = "Microsoft.KeyVault"
+        keySource = var.customer_managed_key.key_source
         keyVaultProperties = {
           keyVaultUri        = local.cmk_key_vault_uri
           keyVaultResourceId = var.customer_managed_key.key_vault_resource_id
           keyVaultKeyName    = var.customer_managed_key.key_name
         }
-      } : null
+        } : {
+        identity           = null
+        keySource          = "Microsoft.NetApp"
+        keyVaultProperties = null
+      }
     }
   }
 

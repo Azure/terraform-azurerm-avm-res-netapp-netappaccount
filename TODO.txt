@@ -1,4 +1,0 @@
-- cmk 
-- diag settings
-- docs generation and tidy
-

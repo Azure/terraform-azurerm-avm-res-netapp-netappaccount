@@ -44,12 +44,9 @@ resource "random_shuffle" "region" {
 }
 ## End of section to provide a random Azure region for the resource group
 
-# This ensures we have unique CAF compliant names for our resources.
-
-# This is required for resource modules
 resource "azapi_resource" "rsg" {
   type                      = "Microsoft.Resources/resourceGroups@2024-03-01"
-  name                      = "rsg-${random_shuffle.region.result[0]}-anf-example-everything-${random_pet.name.id}"
+  name                      = "rsg-${random_shuffle.region.result[0]}-anf-example-combined-${random_pet.name.id}"
   location                  = random_shuffle.region.result[0]
   schema_validation_enabled = false
 
@@ -59,12 +56,11 @@ resource "azapi_resource" "rsg" {
 }
 
 # vNet and Subnet
-
 resource "azapi_resource" "vnet" {
   type      = "Microsoft.Network/virtualNetworks@2024-05-01"
   parent_id = azapi_resource.rsg.id
   location  = azapi_resource.rsg.location
-  name      = "vnet-${random_shuffle.region.result[0]}-anf-example-everything-${random_pet.name.id}"
+  name      = "vnet-${random_shuffle.region.result[0]}-anf-example-combined-${random_pet.name.id}"
 
   body = {
     properties = {
@@ -104,7 +100,7 @@ resource "azapi_resource" "vnet" {
 module "test" {
   source = "../../"
 
-  name                = "anf-account-example-everything-${random_pet.name.id}"
+  name                = "anf-account-example-combined-${random_pet.name.id}"
   location            = azapi_resource.rsg.location
   resource_group_name = azapi_resource.rsg.name
 
