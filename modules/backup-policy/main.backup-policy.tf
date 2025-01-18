@@ -1,11 +1,5 @@
 resource "azapi_resource" "anf-backup-policy" {
-
-  type      = "Microsoft.NetApp/netAppAccounts/backupPolicies@2024-07-01"
-  parent_id = var.account.resource_id
-  name      = var.name
-  location  = var.location
-  tags      = var.tags
-
+  type = "Microsoft.NetApp/netAppAccounts/backupPolicies@2024-07-01"
   body = {
     properties = {
       enabled              = var.enabled
@@ -14,6 +8,9 @@ resource "azapi_resource" "anf-backup-policy" {
       monthlyBackupsToKeep = var.monthly_backups_to_keep
     }
   }
-
+  location                  = var.location
+  name                      = var.name
+  parent_id                 = var.account.resource_id
   schema_validation_enabled = false
+  tags                      = var.tags
 }

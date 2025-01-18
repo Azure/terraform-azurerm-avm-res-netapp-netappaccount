@@ -16,12 +16,6 @@ variable "location" {
   nullable    = false
 }
 
-variable "tags" {
-  type        = map(string)
-  default     = null
-  description = "(Optional) Tags of the resource."
-}
-
 variable "name" {
   type        = string
   description = "(Required) The name of the backup vault."
@@ -41,4 +35,10 @@ For more information see <https://aka.ms/avm/telemetryinfo>.
 If it is set to false, then no telemetry will be collected.
 DESCRIPTION
   nullable    = false
+}
+
+variable "tags" {
+  type        = map(string)
+  default     = null
+  description = "(Optional) Tags of the resource."
 }

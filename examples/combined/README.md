@@ -1,15 +1,15 @@
 <!-- BEGIN_TF_DOCS -->
-# Default example
+# Combined example
 
-This deploys the module in its simplest form.
+This deploys an Azure NetApp Files volume with capacity pools, volumes, backup vaults, backup policies, and snapshots policies.
 
 ```hcl
 terraform {
-  required_version = "~> 1.5"
+  required_version = ">= 1.9.2"
   required_providers {
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = "~> 3.74"
+    azapi = {
+      source  = "azure/azapi"
+      version = "~> 2.1"
     }
     modtm = {
       source  = "azure/modtm"
@@ -21,17 +21,17 @@ terraform {
     }
   }
 }
-
-provider "azurerm" {
-  features {}
+provider "azapi" {
 }
 
 
 ## Section to provide a random Azure region for the resource group
 # This allows us to randomize the region for the resource group.
 module "regions" {
-  source  = "Azure/avm-utl-regions/azurerm"
-  version = "~> 0.1"
+  source                    = "Azure/avm-utl-regions/azurerm"
+  version                   = "~> 0.3"
+  availability_zones_filter = true
+  geography_group_filter    = "Europe"
 }
 
 # This allows us to randomize the region for the resource group.
@@ -39,18 +39,61 @@ resource "random_integer" "region_index" {
   max = length(module.regions.regions) - 1
   min = 0
 }
-## End of section to provide a random Azure region for the resource group
 
-# This ensures we have unique CAF compliant names for our resources.
-module "naming" {
-  source  = "Azure/naming/azurerm"
-  version = "~> 0.3"
+resource "random_pet" "name" {
+  length = 1
 }
 
-# This is required for resource modules
-resource "azurerm_resource_group" "this" {
-  location = module.regions.regions[random_integer.region_index.result].name
-  name     = module.naming.resource_group.name_unique
+resource "random_shuffle" "region" {
+  input        = module.regions.valid_region_names
+  result_count = 1
+}
+## End of section to provide a random Azure region for the resource group
+
+resource "azapi_resource" "rsg" {
+  type = "Microsoft.Resources/resourceGroups@2024-03-01"
+  body = {
+    properties = {}
+  }
+  location                  = random_shuffle.region.result[0]
+  name                      = "rsg-${random_shuffle.region.result[0]}-anf-example-combined-${random_pet.name.id}"
+  schema_validation_enabled = false
+}
+
+# vNet and Subnet
+resource "azapi_resource" "vnet" {
+  type = "Microsoft.Network/virtualNetworks@2024-05-01"
+  body = {
+    properties = {
+      addressSpace = {
+        addressPrefixes = [
+          "10.0.0.0/16"
+        ]
+      }
+      subnets = [
+        {
+          name = "subnet-anf-001"
+          properties = {
+            addressPrefix = "10.0.1.0/24"
+            delegations = [
+              {
+                name = "Microsoft.NetApp/volumes"
+                properties = {
+                  serviceName = "Microsoft.NetApp/volumes"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+  location  = azapi_resource.rsg.location
+  name      = "vnet-${random_shuffle.region.result[0]}-anf-example-combined-${random_pet.name.id}"
+  parent_id = azapi_resource.rsg.id
+  response_export_values = {
+    "anf_subnet_resource_id" = "properties.subnets[0].id"
+  }
 }
 
 # This is the module call
@@ -59,13 +102,171 @@ resource "azurerm_resource_group" "this" {
 # with a data source.
 module "test" {
   source = "../../"
-  # source             = "Azure/avm-<res/ptn>-<name>/azurerm"
-  # ...
-  location            = azurerm_resource_group.this.location
-  name                = "TODO" # TODO update with module.naming.<RESOURCE_TYPE>.name_unique
-  resource_group_name = azurerm_resource_group.this.name
 
-  enable_telemetry = var.enable_telemetry # see variables.tf
+  name                = "anf-account-example-combined-${random_pet.name.id}"
+  location            = azapi_resource.rsg.location
+  resource_group_name = azapi_resource.rsg.name
+
+  tags = {
+    environment = "test"
+  }
+
+  capacity_pools = {
+    "pool1" = {
+      name          = "pool1"
+      size          = 4398046511104
+      service_level = "Premium"
+      tags = {
+        environment = "test"
+      }
+    }
+    "pool2" = {
+      name          = "pool2"
+      size          = 4398046511104
+      service_level = "Standard"
+      qos_type      = "Manual"
+      cool_access   = true
+      tags = {
+        environment = "prod"
+      }
+    }
+  }
+
+  backup_vaults = {
+    "backup-vault-1" = {
+      name = "backup-vault-1"
+      tags = {
+        environment = "prod"
+      }
+    }
+    "backup-vault-2" = {
+      name = "backup-vault-2"
+      tags = {
+        environment = "test"
+      }
+    }
+  }
+
+  backup_policies = {
+    "backup-policy-1" = {
+      name = "backup-policy-1"
+      tags = {
+        environment   = "prod"
+        configuration = "defaults"
+      }
+    }
+    "backup-policy-2" = {
+      name = "backup-policy-2"
+      tags = {
+        environment   = "test"
+        configuration = "custom"
+      }
+      daily_backups_to_keep   = 7
+      weekly_backups_to_keep  = 4
+      monthly_backups_to_keep = 6
+    }
+  }
+
+  snapshot_policies = {
+    "snap-pol-1" = {
+      name = "snap-pol-1"
+      tags = {
+        configuration = "all"
+      }
+      hourly_schedule = {
+        snapshots_to_keep = 8
+        minute            = 0
+      }
+      daily_schedule = {
+        snapshots_to_keep = 7
+        hour              = 0
+        minute            = 0
+      }
+      weekly_schedule = {
+        snapshots_to_keep = 2
+        day               = ["Monday", "Friday"]
+        minute            = 0
+        hour              = 0
+      }
+      monthly_schedule = {
+        snapshots_to_keep = 6
+        days_of_month     = [1, 30]
+        hour              = 0
+        minute            = 0
+      }
+    }
+    "snap-pol-2" = {
+      name = "snap-pol-2"
+      tags = {
+        configuration = "daily only"
+      }
+      hourly_schedule = {
+        snapshots_to_keep = 8
+        minute            = 0
+      }
+      weekly_schedule = {
+        snapshots_to_keep = 2
+        day               = ["Monday", "Friday"]
+        minute            = 0
+        hour              = 0
+      }
+    }
+  }
+
+  volumes = {
+    "volume-1" = {
+      name = "volume-1"
+      tags = {
+        environment = "test"
+      }
+      capacity_pool_map_key = "pool1"
+      subnet_resource_id    = azapi_resource.vnet.output.anf_subnet_resource_id
+      service_level         = "Premium"
+      export_policy_rules = {
+        "rule1" = {
+          rule_index      = 1
+          allowed_clients = ["0.0.0.0/0"]
+          chown_mode      = "Restricted"
+          cifs            = false
+          nfsv3           = true
+          nfsv41          = false
+          has_root_access = true
+          kerberos5i_ro   = false
+          kerberos5i_rw   = false
+          kerberos5p_ro   = false
+          kerberos5p_rw   = false
+          kerberos5_ro    = false
+          kerberos5_rw    = false
+          unix_ro         = false
+          unix_rw         = true
+        }
+      }
+    }
+  }
+}
+
+output "anf_account_resource_id" {
+  value = module.test.resource_id
+}
+
+output "anf_account_name" {
+  value = module.test.name
+}
+
+output "backup_vaults_resource_ids" {
+  value = module.test.backup_vaults_resource_ids
+}
+
+output "backup_policies_resource_ids" {
+  value = module.test.backup_policies_resource_ids
+}
+
+output "snapshot_policies_resource_ids" {
+  value = module.test.snapshot_policies_resource_ids
+}
+
+output "volumes_resource_ids" {
+  value = module.test.volumes_resource_ids
 }
 ```
 
@@ -74,9 +275,9 @@ module "test" {
 
 The following requirements are needed by this module:
 
-- <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (~> 1.5)
+- <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (>= 1.9.2)
 
-- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 3.74)
+- <a name="requirement_azapi"></a> [azapi](#requirement\_azapi) (~> 2.1)
 
 - <a name="requirement_modtm"></a> [modtm](#requirement\_modtm) (~> 0.3)
 
@@ -86,8 +287,11 @@ The following requirements are needed by this module:
 
 The following resources are used by this module:
 
-- [azurerm_resource_group.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group) (resource)
+- [azapi_resource.rsg](https://registry.terraform.io/providers/azure/azapi/latest/docs/resources/resource) (resource)
+- [azapi_resource.vnet](https://registry.terraform.io/providers/azure/azapi/latest/docs/resources/resource) (resource)
 - [random_integer.region_index](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/integer) (resource)
+- [random_pet.name](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/pet) (resource)
+- [random_shuffle.region](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/shuffle) (resource)
 
 <!-- markdownlint-disable MD013 -->
 ## Required Inputs
@@ -110,23 +314,41 @@ Default: `true`
 
 ## Outputs
 
-No outputs.
+The following outputs are exported:
+
+### <a name="output_anf_account_name"></a> [anf\_account\_name](#output\_anf\_account\_name)
+
+Description: n/a
+
+### <a name="output_anf_account_resource_id"></a> [anf\_account\_resource\_id](#output\_anf\_account\_resource\_id)
+
+Description: n/a
+
+### <a name="output_backup_policies_resource_ids"></a> [backup\_policies\_resource\_ids](#output\_backup\_policies\_resource\_ids)
+
+Description: n/a
+
+### <a name="output_backup_vaults_resource_ids"></a> [backup\_vaults\_resource\_ids](#output\_backup\_vaults\_resource\_ids)
+
+Description: n/a
+
+### <a name="output_snapshot_policies_resource_ids"></a> [snapshot\_policies\_resource\_ids](#output\_snapshot\_policies\_resource\_ids)
+
+Description: n/a
+
+### <a name="output_volumes_resource_ids"></a> [volumes\_resource\_ids](#output\_volumes\_resource\_ids)
+
+Description: n/a
 
 ## Modules
 
 The following Modules are called:
 
-### <a name="module_naming"></a> [naming](#module\_naming)
-
-Source: Azure/naming/azurerm
-
-Version: ~> 0.3
-
 ### <a name="module_regions"></a> [regions](#module\_regions)
 
 Source: Azure/avm-utl-regions/azurerm
 
-Version: ~> 0.1
+Version: ~> 0.3
 
 ### <a name="module_test"></a> [test](#module\_test)
 

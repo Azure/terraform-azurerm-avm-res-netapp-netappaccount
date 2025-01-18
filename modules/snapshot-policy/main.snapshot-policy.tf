@@ -1,11 +1,5 @@
 resource "azapi_resource" "anf-snapshot-policy" {
-
-  type      = "Microsoft.NetApp/netAppAccounts/snapshotPolicies@2024-07-01"
-  parent_id = var.account.resource_id
-  name      = var.name
-  location  = var.location
-  tags      = var.tags
-
+  type = "Microsoft.NetApp/netAppAccounts/snapshotPolicies@2024-07-01"
   body = {
     properties = {
       enabled = var.enabled
@@ -13,7 +7,7 @@ resource "azapi_resource" "anf-snapshot-policy" {
       hourlySchedule = var.hourly_schedule != null ? {
         snapshotsToKeep = var.hourly_schedule.snapshots_to_keep
         minute          = var.hourly_schedule.minute
-      } : {
+        } : {
         snapshotsToKeep = null
         minute          = null
       }
@@ -22,7 +16,7 @@ resource "azapi_resource" "anf-snapshot-policy" {
         snapshotsToKeep = var.daily_schedule.snapshots_to_keep
         hour            = var.daily_schedule.hour
         minute          = var.daily_schedule.minute
-      } : {
+        } : {
         snapshotsToKeep = null
         hour            = null
         minute          = null
@@ -53,6 +47,9 @@ resource "azapi_resource" "anf-snapshot-policy" {
       }
     }
   }
-
+  location                  = var.location
+  name                      = var.name
+  parent_id                 = var.account.resource_id
   schema_validation_enabled = false
+  tags                      = var.tags
 }

@@ -1,9 +1,9 @@
-output "resource_id" {
-  value       = azapi_resource.anf-backup-policy.id
-  description = "The Azure NetApp Files Backup Policy Resource ID."
+output "name" {
+  description = "The name of the Azure NetApp Files Backup Policy."
+  value       = azapi_resource.anf-backup-policy.name
 }
 
-output "name" {
-  value       = azapi_resource.anf-backup-policy.name
-  description = "The name of the Azure NetApp Files Backup Policy."
+output "resource_id" {
+  description = "The Azure NetApp Files Backup Policy Resource ID."
+  value       = azapi_resource.anf-backup-policy.id
 }

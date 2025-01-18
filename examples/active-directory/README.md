@@ -1,15 +1,15 @@
 <!-- BEGIN_TF_DOCS -->
-# Default example
+# Active Directory example
 
-This deploys the module in its simplest form.
+This deploys an Azure NetApp Files account and makes a connection to an existing Active Directory domain.
 
 ```hcl
 terraform {
-  required_version = "~> 1.5"
+  required_version = ">= 1.9.2"
   required_providers {
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = "~> 3.74"
+    azapi = {
+      source  = "azure/azapi"
+      version = "~> 2.1"
     }
     modtm = {
       source  = "azure/modtm"
@@ -21,17 +21,18 @@ terraform {
     }
   }
 }
-
-provider "azurerm" {
-  features {}
+provider "azapi" {
 }
 
 
 ## Section to provide a random Azure region for the resource group
 # This allows us to randomize the region for the resource group.
 module "regions" {
-  source  = "Azure/avm-utl-regions/azurerm"
-  version = "~> 0.1"
+  source                    = "Azure/avm-utl-regions/azurerm"
+  version                   = "~> 0.3"
+  availability_zones_filter = true
+  geography_group_filter    = "Europe"
+
 }
 
 # This allows us to randomize the region for the resource group.
@@ -39,18 +40,28 @@ resource "random_integer" "region_index" {
   max = length(module.regions.regions) - 1
   min = 0
 }
+
+resource "random_pet" "name" {
+  length = 1
+}
+
+resource "random_shuffle" "region" {
+  input        = module.regions.valid_region_names
+  result_count = 1
+}
 ## End of section to provide a random Azure region for the resource group
 
 # This ensures we have unique CAF compliant names for our resources.
-module "naming" {
-  source  = "Azure/naming/azurerm"
-  version = "~> 0.3"
-}
 
 # This is required for resource modules
-resource "azurerm_resource_group" "this" {
-  location = module.regions.regions[random_integer.region_index.result].name
-  name     = module.naming.resource_group.name_unique
+resource "azapi_resource" "rsg" {
+  type = "Microsoft.Resources/resourceGroups@2024-03-01"
+  body = {
+    properties = {}
+  }
+  location                  = random_shuffle.region.result[0]
+  name                      = "rsg-${random_shuffle.region.result[0]}-anf-example-adds-${random_pet.name.id}"
+  schema_validation_enabled = false
 }
 
 # This is the module call
@@ -59,13 +70,45 @@ resource "azurerm_resource_group" "this" {
 # with a data source.
 module "test" {
   source = "../../"
-  # source             = "Azure/avm-<res/ptn>-<name>/azurerm"
-  # ...
-  location            = azurerm_resource_group.this.location
-  name                = "TODO" # TODO update with module.naming.<RESOURCE_TYPE>.name_unique
-  resource_group_name = azurerm_resource_group.this.name
 
-  enable_telemetry = var.enable_telemetry # see variables.tf
+  name                = "anf-account-example-adds-${random_pet.name.id}"
+  location            = azapi_resource.rsg.location
+  resource_group_name = azapi_resource.rsg.name
+
+  active_directories = {
+    ad1 = {
+      adds_domain          = "adds-test.local"
+      dns_servers          = ["10.99.255.4"]
+      adds_site_name       = "Azure-UKS"
+      smb_server_name      = "anf-acc-1"
+      adds_admin_user_name = "jtracey01@adds-test.local"
+      adds_admin_password  = var.adds_admin_password
+    }
+  }
+}
+
+output "anf_account_resource_id" {
+  value = module.test.resource_id
+}
+
+output "anf_account_name" {
+  value = module.test.name
+}
+
+output "backup_vaults_resource_ids" {
+  value = module.test.backup_vaults_resource_ids
+}
+
+output "backup_policies_resource_ids" {
+  value = module.test.backup_policies_resource_ids
+}
+
+output "snapshot_policies_resource_ids" {
+  value = module.test.snapshot_policies_resource_ids
+}
+
+output "volumes_resource_ids" {
+  value = module.test.volumes_resource_ids
 }
 ```
 
@@ -74,9 +117,9 @@ module "test" {
 
 The following requirements are needed by this module:
 
-- <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (~> 1.5)
+- <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (>= 1.9.2)
 
-- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 3.74)
+- <a name="requirement_azapi"></a> [azapi](#requirement\_azapi) (~> 2.1)
 
 - <a name="requirement_modtm"></a> [modtm](#requirement\_modtm) (~> 0.3)
 
@@ -86,13 +129,21 @@ The following requirements are needed by this module:
 
 The following resources are used by this module:
 
-- [azurerm_resource_group.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group) (resource)
+- [azapi_resource.rsg](https://registry.terraform.io/providers/azure/azapi/latest/docs/resources/resource) (resource)
 - [random_integer.region_index](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/integer) (resource)
+- [random_pet.name](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/pet) (resource)
+- [random_shuffle.region](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/shuffle) (resource)
 
 <!-- markdownlint-disable MD013 -->
 ## Required Inputs
 
-No required inputs.
+The following input variables are required:
+
+### <a name="input_adds_admin_password"></a> [adds\_admin\_password](#input\_adds\_admin\_password)
+
+Description: The password for the Active Directory Domain Services (ADDS) admin user.
+
+Type: `string`
 
 ## Optional Inputs
 
@@ -110,23 +161,41 @@ Default: `true`
 
 ## Outputs
 
-No outputs.
+The following outputs are exported:
+
+### <a name="output_anf_account_name"></a> [anf\_account\_name](#output\_anf\_account\_name)
+
+Description: n/a
+
+### <a name="output_anf_account_resource_id"></a> [anf\_account\_resource\_id](#output\_anf\_account\_resource\_id)
+
+Description: n/a
+
+### <a name="output_backup_policies_resource_ids"></a> [backup\_policies\_resource\_ids](#output\_backup\_policies\_resource\_ids)
+
+Description: n/a
+
+### <a name="output_backup_vaults_resource_ids"></a> [backup\_vaults\_resource\_ids](#output\_backup\_vaults\_resource\_ids)
+
+Description: n/a
+
+### <a name="output_snapshot_policies_resource_ids"></a> [snapshot\_policies\_resource\_ids](#output\_snapshot\_policies\_resource\_ids)
+
+Description: n/a
+
+### <a name="output_volumes_resource_ids"></a> [volumes\_resource\_ids](#output\_volumes\_resource\_ids)
+
+Description: n/a
 
 ## Modules
 
 The following Modules are called:
 
-### <a name="module_naming"></a> [naming](#module\_naming)
-
-Source: Azure/naming/azurerm
-
-Version: ~> 0.3
-
 ### <a name="module_regions"></a> [regions](#module\_regions)
 
 Source: Azure/avm-utl-regions/azurerm
 
-Version: ~> 0.1
+Version: ~> 0.3
 
 ### <a name="module_test"></a> [test](#module\_test)
 

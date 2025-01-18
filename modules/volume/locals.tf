@@ -1,10 +1,10 @@
 locals {
   avs_data_store                       = var.avs_data_store == true ? "Enabled" : "Disabled"
   creation_token                       = var.creation_token != null ? var.creation_token : var.name
+  enable_sub_volumes                   = var.enable_sub_volumes == true ? "Enabled" : "Disabled"
   security_style                       = var.security_style == null ? contains([for protocol in var.protocol_types : lower(protocol)], "CIFS") ? "NTFS" : "Unix" : var.security_style
   smb_access_based_enumeration_enabled = var.smb_access_based_enumeration_enabled == true ? "Enabled" : "Disabled"
   smb_non_browsable                    = var.smb_non_browsable == true ? "Enabled" : "Disabled"
-  enable_sub_volumes                   = var.enable_sub_volumes == true ? "Enabled" : "Disabled"
   volume_size_in_bytes                 = var.volume_size_in_gib * 1073741824
 }
 

@@ -1,9 +1,9 @@
-output "resource_id" {
-  value       = azapi_resource.anf-snapshot-policy.id
-  description = "The Azure NetApp Files Snapshot Policy Resource ID."
+output "name" {
+  description = "The name of the Azure NetApp Files Snapshot Policy."
+  value       = azapi_resource.anf-snapshot-policy.name
 }
 
-output "name" {
-  value       = azapi_resource.anf-snapshot-policy.name
-  description = "The name of the Azure NetApp Files Snapshot Policy."
+output "resource_id" {
+  description = "The Azure NetApp Files Snapshot Policy Resource ID."
+  value       = azapi_resource.anf-snapshot-policy.id
 }

@@ -16,12 +16,6 @@ variable "location" {
   nullable    = false
 }
 
-variable "tags" {
-  type        = map(string)
-  default     = null
-  description = "(Optional) Tags of the resource."
-}
-
 variable "name" {
   type        = string
   description = "(Required) The name of the backup policy."
@@ -32,33 +26,13 @@ variable "name" {
   }
 }
 
-variable "enabled" {
-  type        = bool
-  description = "(Required) Whether the snapshot policy is enabled. Defaults to `true`."
-  default     = true
-}
-
-variable "hourly_schedule" {
-  type = object({
-    snapshots_to_keep = number
-    minute            = number
-  })
-  description = <<DESCRIPTION
-  (Optional) The hourly schedule for the snapshot policy.
-
-  - snapshots_to_keep - The number of snapshots to keep. Must be between 0 and 255.
-  - minute            - The minute of the hour to take the snapshot. Must be between 0 and 59.
-  
-  DESCRIPTION
-  default     = null
-}
-
 variable "daily_schedule" {
   type = object({
     snapshots_to_keep = number
     hour              = number
     minute            = number
   })
+  default     = null
   description = <<DESCRIPTION
   (Optional) The daily schedule for the snapshot policy.
 
@@ -67,45 +41,6 @@ variable "daily_schedule" {
   - minute            - The minute of the hour to take the snapshot. Must be between 0 and 59.
   
   DESCRIPTION
-  default     = null
-}
-
-variable "weekly_schedule" {
-  type = object({
-    snapshots_to_keep = number
-    day               = set(string)
-    hour              = number
-    minute            = number
-  })
-  description = <<DESCRIPTION
-  (Optional) The weekly schedule for the snapshot policy.
-
-  - snapshots_to_keep - The number of snapshots to keep. Must be between 0 and 255.
-  - day               - A list of the days of the week to take the snapshot. Must use the following in the list: `Monday`, `Tuesday`, `Wednesday`, `Thursday`, `Friday`, `Saturday`, `Sunday`.
-  - hour              - The hour of the day to take the snapshot. Must be between 0 and 23.
-  - minute            - The minute of the hour to take the snapshot. Must be between 0 and 59.
-  
-  DESCRIPTION
-  default     = null
-}
-
-variable "monthly_schedule" {
-  type = object({
-    snapshots_to_keep = number
-    days_of_month     = set(number)
-    hour              = number
-    minute            = number
-  })
-  description = <<DESCRIPTION
-  (Optional) The monthly schedule for the snapshot policy.
-
-  - snapshots_to_keep - The number of snapshots to keep. Must be between 0 and 255.
-  - days_of_month     - The list of days of the month (number) to take the snapshot. Values must be between 1 and 30.
-  - hour              - The hour of the day to take the snapshot. Must be between 0 and 23.
-  - minute            - The minute of the hour to take the snapshot. Must be between 0 and 59.
-  
-  DESCRIPTION
-  default     = null
 }
 
 variable "enable_telemetry" {
@@ -117,4 +52,69 @@ For more information see <https://aka.ms/avm/telemetryinfo>.
 If it is set to false, then no telemetry will be collected.
 DESCRIPTION
   nullable    = false
+}
+
+variable "enabled" {
+  type        = bool
+  default     = true
+  description = "(Required) Whether the snapshot policy is enabled. Defaults to `true`."
+}
+
+variable "hourly_schedule" {
+  type = object({
+    snapshots_to_keep = number
+    minute            = number
+  })
+  default     = null
+  description = <<DESCRIPTION
+  (Optional) The hourly schedule for the snapshot policy.
+
+  - snapshots_to_keep - The number of snapshots to keep. Must be between 0 and 255.
+  - minute            - The minute of the hour to take the snapshot. Must be between 0 and 59.
+  
+  DESCRIPTION
+}
+
+variable "monthly_schedule" {
+  type = object({
+    snapshots_to_keep = number
+    days_of_month     = set(number)
+    hour              = number
+    minute            = number
+  })
+  default     = null
+  description = <<DESCRIPTION
+  (Optional) The monthly schedule for the snapshot policy.
+
+  - snapshots_to_keep - The number of snapshots to keep. Must be between 0 and 255.
+  - days_of_month     - The list of days of the month (number) to take the snapshot. Values must be between 1 and 30.
+  - hour              - The hour of the day to take the snapshot. Must be between 0 and 23.
+  - minute            - The minute of the hour to take the snapshot. Must be between 0 and 59.
+  
+  DESCRIPTION
+}
+
+variable "tags" {
+  type        = map(string)
+  default     = null
+  description = "(Optional) Tags of the resource."
+}
+
+variable "weekly_schedule" {
+  type = object({
+    snapshots_to_keep = number
+    day               = set(string)
+    hour              = number
+    minute            = number
+  })
+  default     = null
+  description = <<DESCRIPTION
+  (Optional) The weekly schedule for the snapshot policy.
+
+  - snapshots_to_keep - The number of snapshots to keep. Must be between 0 and 255.
+  - day               - A list of the days of the week to take the snapshot. Must use the following in the list: `Monday`, `Tuesday`, `Wednesday`, `Thursday`, `Friday`, `Saturday`, `Sunday`.
+  - hour              - The hour of the day to take the snapshot. Must be between 0 and 23.
+  - minute            - The minute of the hour to take the snapshot. Must be between 0 and 59.
+  
+  DESCRIPTION
 }

@@ -1,15 +1,15 @@
 <!-- BEGIN_TF_DOCS -->
-# Default example
+# Snapshot Policies
 
-This deploys the module in its simplest form.
+This deploys the with snapshot policies in an Azure NetApp Files account.
 
 ```hcl
 terraform {
-  required_version = "~> 1.5"
+  required_version = ">= 1.9.2"
   required_providers {
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = "~> 3.74"
+    azapi = {
+      source  = "azure/azapi"
+      version = "~> 2.1"
     }
     modtm = {
       source  = "azure/modtm"
@@ -21,17 +21,18 @@ terraform {
     }
   }
 }
-
-provider "azurerm" {
-  features {}
+provider "azapi" {
 }
 
 
 ## Section to provide a random Azure region for the resource group
 # This allows us to randomize the region for the resource group.
 module "regions" {
-  source  = "Azure/avm-utl-regions/azurerm"
-  version = "~> 0.1"
+  source                    = "Azure/avm-utl-regions/azurerm"
+  version                   = "~> 0.3"
+  availability_zones_filter = true
+  geography_group_filter    = "Europe"
+
 }
 
 # This allows us to randomize the region for the resource group.
@@ -39,18 +40,28 @@ resource "random_integer" "region_index" {
   max = length(module.regions.regions) - 1
   min = 0
 }
+
+resource "random_pet" "name" {
+  length = 1
+}
+
+resource "random_shuffle" "region" {
+  input        = module.regions.valid_region_names
+  result_count = 1
+}
 ## End of section to provide a random Azure region for the resource group
 
 # This ensures we have unique CAF compliant names for our resources.
-module "naming" {
-  source  = "Azure/naming/azurerm"
-  version = "~> 0.3"
-}
 
 # This is required for resource modules
-resource "azurerm_resource_group" "this" {
-  location = module.regions.regions[random_integer.region_index.result].name
-  name     = module.naming.resource_group.name_unique
+resource "azapi_resource" "rsg" {
+  type = "Microsoft.Resources/resourceGroups@2024-03-01"
+  body = {
+    properties = {}
+  }
+  location                  = random_shuffle.region.result[0]
+  name                      = "rsg-${random_shuffle.region.result[0]}-anf-example-snapshot-pol-${random_pet.name.id}"
+  schema_validation_enabled = false
 }
 
 # This is the module call
@@ -59,13 +70,55 @@ resource "azurerm_resource_group" "this" {
 # with a data source.
 module "test" {
   source = "../../"
-  # source             = "Azure/avm-<res/ptn>-<name>/azurerm"
-  # ...
-  location            = azurerm_resource_group.this.location
-  name                = "TODO" # TODO update with module.naming.<RESOURCE_TYPE>.name_unique
-  resource_group_name = azurerm_resource_group.this.name
 
-  enable_telemetry = var.enable_telemetry # see variables.tf
+  name                = "anf-account-example-backup-vlt-${random_pet.name.id}"
+  location            = azapi_resource.rsg.location
+  resource_group_name = azapi_resource.rsg.name
+  snapshot_policies = {
+    "snap-pol-1" = {
+      name = "snap-pol-1"
+      tags = {
+        configuration = "all"
+      }
+      hourly_schedule = {
+        snapshots_to_keep = 8
+        minute            = 0
+      }
+      daily_schedule = {
+        snapshots_to_keep = 7
+        hour              = 0
+        minute            = 0
+      }
+      weekly_schedule = {
+        snapshots_to_keep = 2
+        day               = ["Monday", "Friday"]
+        minute            = 0
+        hour              = 0
+      }
+      monthly_schedule = {
+        snapshots_to_keep = 6
+        days_of_month     = [1, 30]
+        hour              = 0
+        minute            = 0
+      }
+    }
+    "snap-pol-2" = {
+      name = "snap-pol-2"
+      tags = {
+        configuration = "daily only"
+      }
+      hourly_schedule = {
+        snapshots_to_keep = 8
+        minute            = 0
+      }
+      weekly_schedule = {
+        snapshots_to_keep = 2
+        day               = ["Monday", "Friday"]
+        minute            = 0
+        hour              = 0
+      }
+    }
+  }
 }
 ```
 
@@ -74,9 +127,9 @@ module "test" {
 
 The following requirements are needed by this module:
 
-- <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (~> 1.5)
+- <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (>= 1.9.2)
 
-- <a name="requirement_azurerm"></a> [azurerm](#requirement\_azurerm) (~> 3.74)
+- <a name="requirement_azapi"></a> [azapi](#requirement\_azapi) (~> 2.1)
 
 - <a name="requirement_modtm"></a> [modtm](#requirement\_modtm) (~> 0.3)
 
@@ -86,8 +139,10 @@ The following requirements are needed by this module:
 
 The following resources are used by this module:
 
-- [azurerm_resource_group.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/resource_group) (resource)
+- [azapi_resource.rsg](https://registry.terraform.io/providers/azure/azapi/latest/docs/resources/resource) (resource)
 - [random_integer.region_index](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/integer) (resource)
+- [random_pet.name](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/pet) (resource)
+- [random_shuffle.region](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/shuffle) (resource)
 
 <!-- markdownlint-disable MD013 -->
 ## Required Inputs
@@ -116,17 +171,11 @@ No outputs.
 
 The following Modules are called:
 
-### <a name="module_naming"></a> [naming](#module\_naming)
-
-Source: Azure/naming/azurerm
-
-Version: ~> 0.3
-
 ### <a name="module_regions"></a> [regions](#module\_regions)
 
 Source: Azure/avm-utl-regions/azurerm
 
-Version: ~> 0.1
+Version: ~> 0.3
 
 ### <a name="module_test"></a> [test](#module\_test)
 

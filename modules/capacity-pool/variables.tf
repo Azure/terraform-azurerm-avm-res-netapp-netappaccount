@@ -10,44 +10,10 @@ variable "account" {
   nullable    = false
 }
 
-variable "cool_access" {
-  type        = bool
-  default     = false
-  description = "(Optional) Specifies whether the volume is cool access enabled. Default is false."
-}
-
-variable "encryption_type" {
-  type        = string
-  description = "(Optional) Specifies the encryption type of the volume."
-  default     = "Single"
-
-  validation {
-    condition     = can(regex("^(Single|Double)$", var.encryption_type))
-    error_message = "The encryption_type value must be either Single or Double."
-  }
-}
-
-variable "qos_type" {
-  type        = string
-  description = "(Optional) Specifies the QoS type of the volume."
-  default     = "Auto"
-
-  validation {
-    condition     = can(regex("^(Auto|Manual)$", var.qos_type))
-    error_message = "The qos_type value must be either Auto or Manual."
-  }
-}
-
 variable "location" {
   type        = string
   description = "Azure region where the resource should be deployed."
   nullable    = false
-}
-
-variable "tags" {
-  type        = map(string)
-  default     = null
-  description = "(Optional) Tags of the resource."
 }
 
 variable "name" {
@@ -57,6 +23,56 @@ variable "name" {
   validation {
     condition     = can(regex("^[a-zA-Z0-9_-]{1,64}$", var.name))
     error_message = "The NetApp Files Capacity Pool name must be be 1-64 characters in length and can only contain alphanumeric, hyphens and underscores."
+  }
+}
+
+variable "cool_access" {
+  type        = bool
+  default     = false
+  description = "(Optional) Specifies whether the volume is cool access enabled. Default is false."
+}
+
+variable "enable_telemetry" {
+  type        = bool
+  default     = true
+  description = <<DESCRIPTION
+This variable controls whether or not telemetry is enabled for the module.
+For more information see <https://aka.ms/avm/telemetryinfo>.
+If it is set to false, then no telemetry will be collected.
+DESCRIPTION
+  nullable    = false
+}
+
+variable "encryption_type" {
+  type        = string
+  default     = "Single"
+  description = "(Optional) Specifies the encryption type of the volume."
+
+  validation {
+    condition     = can(regex("^(Single|Double)$", var.encryption_type))
+    error_message = "The encryption_type value must be either Single or Double."
+  }
+}
+
+variable "qos_type" {
+  type        = string
+  default     = "Auto"
+  description = "(Optional) Specifies the QoS type of the volume."
+
+  validation {
+    condition     = can(regex("^(Auto|Manual)$", var.qos_type))
+    error_message = "The qos_type value must be either Auto or Manual."
+  }
+}
+
+variable "service_level" {
+  type        = string
+  default     = "Standard"
+  description = "(Optional) The service level of the capacity pool. Defaults to 'Standard'."
+
+  validation {
+    condition     = can(regex("^(Standard|Premium|Ultra)$", var.service_level))
+    error_message = "The NetApp Files Capacity Pool service level must be either 'Standard', 'Premium' or 'Ultra'."
   }
 }
 
@@ -75,24 +91,8 @@ variable "size" {
   }
 }
 
-variable "service_level" {
-  type        = string
-  description = "(Optional) The service level of the capacity pool. Defaults to 'Standard'."
-  default     = "Standard"
-
-  validation {
-    condition     = can(regex("^(Standard|Premium|Ultra)$", var.service_level))
-    error_message = "The NetApp Files Capacity Pool service level must be either 'Standard', 'Premium' or 'Ultra'."
-  }
-}
-
-variable "enable_telemetry" {
-  type        = bool
-  default     = true
-  description = <<DESCRIPTION
-This variable controls whether or not telemetry is enabled for the module.
-For more information see <https://aka.ms/avm/telemetryinfo>.
-If it is set to false, then no telemetry will be collected.
-DESCRIPTION
-  nullable    = false
+variable "tags" {
+  type        = map(string)
+  default     = null
+  description = "(Optional) Tags of the resource."
 }

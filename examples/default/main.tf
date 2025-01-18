@@ -49,14 +49,13 @@ resource "random_shuffle" "region" {
 
 # This is required for resource modules
 resource "azapi_resource" "rsg" {
-  type                      = "Microsoft.Resources/resourceGroups@2024-03-01"
-  name                      = "rsg-${random_shuffle.region.result[0]}-anf-example-default-${random_pet.name.id}"
-  location                  = random_shuffle.region.result[0]
-  schema_validation_enabled = false
-
+  type = "Microsoft.Resources/resourceGroups@2024-03-01"
   body = {
     properties = {}
   }
+  location                  = random_shuffle.region.result[0]
+  name                      = "rsg-${random_shuffle.region.result[0]}-anf-example-default-${random_pet.name.id}"
+  schema_validation_enabled = false
 }
 
 # This is the module call
