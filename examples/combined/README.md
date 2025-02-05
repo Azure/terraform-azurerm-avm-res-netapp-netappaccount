@@ -5,7 +5,7 @@ This deploys an Azure NetApp Files volume with capacity pools, volumes, backup v
 
 ```hcl
 terraform {
-  required_version = ">= 1.9.2"
+  required_version = ">= 1.9, < 2.0"
   required_providers {
     azapi = {
       source  = "azure/azapi"
@@ -271,7 +271,7 @@ output "volumes_resource_ids" {
 
 The following requirements are needed by this module:
 
-- <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (>= 1.9.2)
+- <a name="requirement_terraform"></a> [terraform](#requirement\_terraform) (>= 1.9, < 2.0)
 
 - <a name="requirement_azapi"></a> [azapi](#requirement\_azapi) (~> 2.1)
 
