@@ -24,11 +24,11 @@ provider "azapi" {
 ## Section to provide a random Azure region for the resource group
 # This allows us to randomize the region for the resource group.
 module "regions" {
-  source                    = "Azure/avm-utl-regions/azurerm"
-  version                   = "~> 0.3"
+  source  = "Azure/avm-utl-regions/azurerm"
+  version = "~> 0.3"
+
   availability_zones_filter = true
   geography_group_filter    = "Europe"
-
 }
 
 # This allows us to randomize the region for the resource group.
@@ -67,23 +67,9 @@ resource "azapi_resource" "rsg" {
 module "test" {
   source = "../../"
 
-  name                = "anf-account-example-backup-vlt-${random_pet.name.id}"
   location            = azapi_resource.rsg.location
+  name                = "anf-account-example-backup-vlt-${random_pet.name.id}"
   resource_group_name = azapi_resource.rsg.name
-  backup_vaults = {
-    "backup-vault-1" = {
-      name = "backup-vault-1"
-      tags = {
-        environment = "prod"
-      }
-    }
-    "backup-vault-2" = {
-      name = "backup-vault-2"
-      tags = {
-        environment = "test"
-      }
-    }
-  }
   backup_policies = {
     "backup-policy-1" = {
       name = "backup-policy-1"
@@ -103,31 +89,27 @@ module "test" {
       monthly_backups_to_keep = 6
     }
   }
+  backup_vaults = {
+    "backup-vault-1" = {
+      name = "backup-vault-1"
+      tags = {
+        environment = "prod"
+      }
+    }
+    "backup-vault-2" = {
+      name = "backup-vault-2"
+      tags = {
+        environment = "test"
+      }
+    }
+  }
 }
 
-output "anf_account_resource_id" {
-  value = module.test.resource_id
-}
 
-output "anf_account_name" {
-  value = module.test.name
-}
 
-output "backup_vaults_resource_ids" {
-  value = module.test.backup_vaults_resource_ids
-}
 
-output "backup_policies_resource_ids" {
-  value = module.test.backup_policies_resource_ids
-}
 
-output "snapshot_policies_resource_ids" {
-  value = module.test.snapshot_policies_resource_ids
-}
 
-output "volumes_resource_ids" {
-  value = module.test.volumes_resource_ids
-}
 ```
 
 <!-- markdownlint-disable MD033 -->

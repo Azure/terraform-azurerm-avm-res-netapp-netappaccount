@@ -1,7 +1,7 @@
 resource "azapi_resource" "anf_capacity_pool_volume" {
   type = "Microsoft.NetApp/netAppAccounts/capacityPools/volumes@2024-07-01"
   body = {
-    zones = var.zone
+    zones = var.zone == null ? null : [tostring(var.zone)]
     properties = {
       avsDataStore                      = local.avs_data_store
       coolAccess                        = var.cool_access
@@ -43,14 +43,14 @@ resource "azapi_resource" "anf_capacity_pool_volume" {
         } : null
         # To be added in future requires some POST operations via azapi_resource_action - do as seperate child module
         # replication = {
-        #   endpointType           = 
-        #   remoteVolumeRegion     = 
-        #   remoteVolumeResourceId = 
-        #   replicationSchedule    = 
+        #   endpointType           =
+        #   remoteVolumeRegion     =
+        #   remoteVolumeResourceId =
+        #   replicationSchedule    =
         #   remotePath = {
-        #     externalHostName = 
-        #     serverName       = 
-        #     volumeName       = 
+        #     externalHostName =
+        #     serverName       =
+        #     volumeName       =
         #   }
         # }
         snapshot = var.snapshot_policy_resource_id != null ? {
