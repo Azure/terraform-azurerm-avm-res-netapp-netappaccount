@@ -236,6 +236,7 @@ module "test" {
       subnet_resource_id    = azapi_resource.vnet.output.anf_subnet_resource_id
       service_level         = "Standard"
       volume_size_in_gib    = 100
+      throughput_mibps      = 32
       zone                  = 1
       export_policy_rules = {
         "rule1" = {
