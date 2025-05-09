@@ -18,8 +18,9 @@ provider "azapi" {
 ## Section to provide a random Azure region for the resource group
 # This allows us to randomize the region for the resource group.
 module "regions" {
-  source                    = "Azure/avm-utl-regions/azurerm"
-  version                   = "~> 0.3"
+  source  = "Azure/avm-utl-regions/azurerm"
+  version = "~> 0.3"
+
   availability_zones_filter = true
   geography_group_filter    = "Europe"
 }
@@ -93,14 +94,42 @@ resource "azapi_resource" "vnet" {
 module "test" {
   source = "../../"
 
-  name                = "anf-account-example-combined-${random_pet.name.id}"
   location            = azapi_resource.rsg.location
+  name                = "anf-account-example-combined-${random_pet.name.id}"
   resource_group_name = azapi_resource.rsg.name
-
-  tags = {
-    environment = "test"
+  backup_policies = {
+    "backup-policy-1" = {
+      name = "backup-policy-1"
+      tags = {
+        environment   = "prod"
+        configuration = "defaults"
+      }
+    }
+    "backup-policy-2" = {
+      name = "backup-policy-2"
+      tags = {
+        environment   = "test"
+        configuration = "custom"
+      }
+      daily_backups_to_keep   = 7
+      weekly_backups_to_keep  = 4
+      monthly_backups_to_keep = 6
+    }
   }
-
+  backup_vaults = {
+    "backup-vault-1" = {
+      name = "backup-vault-1"
+      tags = {
+        environment = "prod"
+      }
+    }
+    "backup-vault-2" = {
+      name = "backup-vault-2"
+      tags = {
+        environment = "test"
+      }
+    }
+  }
   capacity_pools = {
     "pool1" = {
       name          = "pool1"
@@ -121,42 +150,6 @@ module "test" {
       }
     }
   }
-
-  backup_vaults = {
-    "backup-vault-1" = {
-      name = "backup-vault-1"
-      tags = {
-        environment = "prod"
-      }
-    }
-    "backup-vault-2" = {
-      name = "backup-vault-2"
-      tags = {
-        environment = "test"
-      }
-    }
-  }
-
-  backup_policies = {
-    "backup-policy-1" = {
-      name = "backup-policy-1"
-      tags = {
-        environment   = "prod"
-        configuration = "defaults"
-      }
-    }
-    "backup-policy-2" = {
-      name = "backup-policy-2"
-      tags = {
-        environment   = "test"
-        configuration = "custom"
-      }
-      daily_backups_to_keep   = 7
-      weekly_backups_to_keep  = 4
-      monthly_backups_to_keep = 6
-    }
-  }
-
   snapshot_policies = {
     "snap-pol-1" = {
       name = "snap-pol-1"
@@ -202,7 +195,9 @@ module "test" {
       }
     }
   }
-
+  tags = {
+    environment = "test"
+  }
   volumes = {
     "volume-1" = {
       name = "volume-1"
@@ -232,29 +227,41 @@ module "test" {
         }
       }
     }
+    "zone-volume-1" = {
+      name = "zone-volume-1"
+      tags = {
+        environment = "test"
+      }
+      capacity_pool_map_key = "pool2"
+      subnet_resource_id    = azapi_resource.vnet.output.anf_subnet_resource_id
+      service_level         = "Standard"
+      volume_size_in_gib    = 100
+      zone                  = 1
+      export_policy_rules = {
+        "rule1" = {
+          rule_index      = 1
+          allowed_clients = ["0.0.0.0/0"]
+          chown_mode      = "Restricted"
+          cifs            = false
+          nfsv3           = true
+          nfsv41          = false
+          has_root_access = true
+          kerberos5i_ro   = false
+          kerberos5i_rw   = false
+          kerberos5p_ro   = false
+          kerberos5p_rw   = false
+          kerberos5_ro    = false
+          kerberos5_rw    = false
+          unix_ro         = false
+          unix_rw         = true
+        }
+      }
+    }
   }
 }
 
-output "anf_account_resource_id" {
-  value = module.test.resource_id
-}
 
-output "anf_account_name" {
-  value = module.test.name
-}
 
-output "backup_vaults_resource_ids" {
-  value = module.test.backup_vaults_resource_ids
-}
 
-output "backup_policies_resource_ids" {
-  value = module.test.backup_policies_resource_ids
-}
 
-output "snapshot_policies_resource_ids" {
-  value = module.test.snapshot_policies_resource_ids
-}
 
-output "volumes_resource_ids" {
-  value = module.test.volumes_resource_ids
-}

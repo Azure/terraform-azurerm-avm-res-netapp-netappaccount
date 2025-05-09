@@ -18,11 +18,11 @@ provider "azapi" {
 ## Section to provide a random Azure region for the resource group
 # This allows us to randomize the region for the resource group.
 module "regions" {
-  source                    = "Azure/avm-utl-regions/azurerm"
-  version                   = "~> 0.3"
+  source  = "Azure/avm-utl-regions/azurerm"
+  version = "~> 0.3"
+
   availability_zones_filter = true
   geography_group_filter    = "Europe"
-
 }
 
 # This allows us to randomize the region for the resource group.
@@ -61,31 +61,13 @@ resource "azapi_resource" "rsg" {
 module "test" {
   source = "../../"
 
-  name                = "anf-account-example-default-${random_pet.name.id}"
   location            = azapi_resource.rsg.location
+  name                = "anf-account-example-default-${random_pet.name.id}"
   resource_group_name = azapi_resource.rsg.name
 }
 
-output "anf_account_resource_id" {
-  value = module.test.resource_id
-}
 
-output "anf_account_name" {
-  value = module.test.name
-}
 
-output "backup_vaults_resource_ids" {
-  value = module.test.backup_vaults_resource_ids
-}
 
-output "backup_policies_resource_ids" {
-  value = module.test.backup_policies_resource_ids
-}
 
-output "snapshot_policies_resource_ids" {
-  value = module.test.snapshot_policies_resource_ids
-}
 
-output "volumes_resource_ids" {
-  value = module.test.volumes_resource_ids
-}
