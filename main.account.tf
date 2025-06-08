@@ -1,7 +1,10 @@
 
 
 resource "azapi_resource" "anf_account" {
-  type = "Microsoft.NetApp/netAppAccounts@2024-07-01"
+  location  = var.location
+  name      = var.name
+  parent_id = provider::azapi::subscription_resource_id(local.subscription_id, "Microsoft.Resources/resourceGroups", [var.resource_group_name])
+  type      = "Microsoft.NetApp/netAppAccounts@2024-07-01"
   body = {
     properties = {
       activeDirectories = var.active_directories != null ? [
@@ -48,9 +51,6 @@ resource "azapi_resource" "anf_account" {
       }
     }
   }
-  location  = var.location
-  name      = var.name
-  parent_id = provider::azapi::subscription_resource_id(local.subscription_id, "Microsoft.Resources/resourceGroups", [var.resource_group_name])
   retry = {
     error_message_regex = ["CannotDeleteResource"]
   }
@@ -70,13 +70,13 @@ resource "azapi_resource" "anf_account" {
 resource "azapi_resource" "anf_account_lock" {
   count = var.lock != null ? 1 : 0
 
-  type = "Microsoft.Authorization/locks@2020-05-01"
+  name      = coalesce(var.lock.name, "lock-${var.lock.kind}")
+  parent_id = azapi_resource.anf_account.id
+  type      = "Microsoft.Authorization/locks@2020-05-01"
   body = {
     properties = {
       level = var.lock.kind
       notes = var.lock.kind == "CanNotDelete" ? "Cannot delete the resource or its child resources." : "Cannot delete or modify the resource or its child resources."
     }
   }
-  name      = coalesce(var.lock.name, "lock-${var.lock.kind}")
-  parent_id = azapi_resource.anf_account.id
 }
