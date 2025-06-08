@@ -1,7 +1,9 @@
 resource "azapi_resource" "name" {
   for_each = var.role_assignments
 
-  type = "Microsoft.Authorization/roleAssignments@2022-04-01"
+  name      = uuidv5("oid", local.role_definition_id_principal_and_definition_uuidv5[each.key])
+  parent_id = azapi_resource.anf_account.id
+  type      = "Microsoft.Authorization/roleAssignments@2022-04-01"
   body = {
     properties = {
       principalId                        = each.value.principal_id
@@ -13,7 +15,5 @@ resource "azapi_resource" "name" {
       delegatedManagedIdentityResourceId = each.value.delegated_managed_identity_resource_id
     }
   }
-  name      = uuidv5("oid", local.role_definition_id_principal_and_definition_uuidv5[each.key])
-  parent_id = azapi_resource.anf_account.id
 }
 
