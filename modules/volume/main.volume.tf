@@ -1,5 +1,8 @@
 resource "azapi_resource" "anf_capacity_pool_volume" {
-  type = "Microsoft.NetApp/netAppAccounts/capacityPools/volumes@2024-07-01"
+  location  = var.location
+  name      = var.name
+  parent_id = var.capacity_pool_resource_id
+  type      = "Microsoft.NetApp/netAppAccounts/capacityPools/volumes@2024-07-01"
   body = {
     zones = var.zone == null ? null : [tostring(var.zone)]
     properties = {
@@ -64,9 +67,6 @@ resource "azapi_resource" "anf_capacity_pool_volume" {
 
     }
   }
-  location                  = var.location
-  name                      = var.name
-  parent_id                 = var.capacity_pool_resource_id
   schema_validation_enabled = true
   tags                      = var.tags
 }

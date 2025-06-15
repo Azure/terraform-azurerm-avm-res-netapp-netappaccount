@@ -48,18 +48,21 @@ resource "random_shuffle" "region" {
 ## End of section to provide a random Azure region for the resource group
 
 resource "azapi_resource" "rsg" {
-  type = "Microsoft.Resources/resourceGroups@2024-03-01"
+  location = random_shuffle.region.result[0]
+  name     = "rsg-${random_shuffle.region.result[0]}-anf-example-combined-${random_pet.name.id}"
+  type     = "Microsoft.Resources/resourceGroups@2024-03-01"
   body = {
     properties = {}
   }
-  location                  = random_shuffle.region.result[0]
-  name                      = "rsg-${random_shuffle.region.result[0]}-anf-example-combined-${random_pet.name.id}"
   schema_validation_enabled = false
 }
 
 # vNet and Subnet
 resource "azapi_resource" "vnet" {
-  type = "Microsoft.Network/virtualNetworks@2024-05-01"
+  location  = azapi_resource.rsg.location
+  name      = "vnet-${random_shuffle.region.result[0]}-anf-example-combined-${random_pet.name.id}"
+  parent_id = azapi_resource.rsg.id
+  type      = "Microsoft.Network/virtualNetworks@2024-05-01"
   body = {
     properties = {
       addressSpace = {
@@ -85,9 +88,6 @@ resource "azapi_resource" "vnet" {
       ]
     }
   }
-  location  = azapi_resource.rsg.location
-  name      = "vnet-${random_shuffle.region.result[0]}-anf-example-combined-${random_pet.name.id}"
-  parent_id = azapi_resource.rsg.id
   response_export_values = {
     "anf_subnet_resource_id" = "properties.subnets[0].id"
   }
