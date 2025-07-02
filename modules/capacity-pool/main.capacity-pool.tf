@@ -1,5 +1,8 @@
 resource "azapi_resource" "anf_capacity_pool" {
-  type = "Microsoft.NetApp/netAppAccounts/capacityPools@2024-07-01"
+  location  = var.location
+  name      = var.name
+  parent_id = var.account.resource_id
+  type      = "Microsoft.NetApp/netAppAccounts/capacityPools@2024-07-01"
   body = {
     properties = {
       serviceLevel   = var.service_level
@@ -9,9 +12,6 @@ resource "azapi_resource" "anf_capacity_pool" {
       encryptionType = var.encryption_type != null ? var.encryption_type : null
     }
   }
-  location  = var.location
-  name      = var.name
-  parent_id = var.account.resource_id
   retry = {
     error_message_regex = ["CannotDeleteResource"]
   }

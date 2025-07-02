@@ -1,5 +1,8 @@
 resource "azapi_resource" "anf_snapshot_policy" {
-  type = "Microsoft.NetApp/netAppAccounts/snapshotPolicies@2024-07-01"
+  location  = var.location
+  name      = var.name
+  parent_id = var.account.resource_id
+  type      = "Microsoft.NetApp/netAppAccounts/snapshotPolicies@2024-07-01"
   body = {
     properties = {
       enabled = var.enabled
@@ -47,9 +50,6 @@ resource "azapi_resource" "anf_snapshot_policy" {
       }
     }
   }
-  location                  = var.location
-  name                      = var.name
-  parent_id                 = var.account.resource_id
   schema_validation_enabled = false
   tags                      = var.tags
 }
