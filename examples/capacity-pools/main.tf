@@ -1,5 +1,6 @@
 terraform {
   required_version = ">= 1.9, < 2.0"
+
   required_providers {
     azapi = {
       source  = "azure/azapi"
@@ -45,12 +46,12 @@ resource "random_shuffle" "region" {
 
 # This is required for resource modules
 resource "azapi_resource" "rsg" {
-  type = "Microsoft.Resources/resourceGroups@2024-03-01"
+  location = random_shuffle.region.result[0]
+  name     = "rsg-${random_shuffle.region.result[0]}-anf-example-cap-pool-${random_pet.name.id}"
+  type     = "Microsoft.Resources/resourceGroups@2024-03-01"
   body = {
     properties = {}
   }
-  location                  = random_shuffle.region.result[0]
-  name                      = "rsg-${random_shuffle.region.result[0]}-anf-example-cap-pool-${random_pet.name.id}"
   schema_validation_enabled = false
 }
 
