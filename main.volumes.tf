@@ -13,6 +13,7 @@ module "volumes" {
   cool_access                            = each.value.cool_access
   cool_access_retrieval_policy           = each.value.cool_access_retrieval_policy
   coolness_period                        = each.value.coolness_period
+  creation_token                         = each.value.creation_token
   default_group_quota_in_kibs            = each.value.default_group_quota_in_kibs
   default_quota_enabled                  = each.value.default_quota_enabled
   default_user_quota_in_kibs             = each.value.default_user_quota_in_kibs

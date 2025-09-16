@@ -94,8 +94,12 @@ variable "coolness_period" {
 
 variable "creation_token" {
   type        = string
-  default     = null
-  description = "(Optional) A unique file path for the volume. Used when creating mount targets. Default is `null` which means the `name` variable value is used in place."
+  description = "A unique file path for the volume. Used when creating mount targets. Default is `null` which means the `name` variable value is used in place."
+
+  validation {
+    condition     = var.creation_token == null || can(regex("^[a-zA-Z][a-zA-Z0-9\\-]{0,79}$", var.creation_token))
+    error_message = "The creation token must be specified and be 1-80 characters in length, start with a letter and can only contain alphanumeric and hyphens."
+  }
 }
 
 variable "default_group_quota_in_kibs" {
