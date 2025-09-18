@@ -192,7 +192,7 @@ A map describing customer-managed keys to associate with the resource. This incl
 - `key_source` - (Optional) The source of the key. Possible values are `Microsoft.NetApp` and `Microsoft.KeyVault`. Default is `Microsoft.NetApp`.
 - `user_assigned_identity` - (Optional) An object representing a user-assigned identity with the following properties:
   - `resource_id` - The resource ID of the user-assigned identity.
-DESCRIPTION  
+DESCRIPTION
 }
 
 variable "enable_telemetry" {
@@ -352,7 +352,7 @@ variable "volumes" {
     avs_data_store               = optional(bool)
     backup_policy_map_key        = optional(string)
     backup_vault_map_key         = optional(string)
-    backup_policy_enforced       = optional(bool)
+    backup_policy_enforced       = optional(bool, false)
     cool_access                  = optional(bool, false)
     cool_access_retrieval_policy = optional(string)
     coolness_period              = optional(number)
@@ -405,7 +405,7 @@ variable "volumes" {
   default     = {}
   description = <<DESCRIPTION
 
-(Optional) A map of volumes to create in the Azure Netapp Files account capacity pool specified by the `capacity_pool_map_key`. 
+(Optional) A map of volumes to create in the Azure Netapp Files account capacity pool specified by the `capacity_pool_map_key`.
 
 > The capacity pool must be specified in the `capacity_pools` variable of this module. If it is not, then please call the volume child module directly to create a volume on a capacity pool managed outside of this module.
 
