@@ -94,11 +94,11 @@ variable "coolness_period" {
 
 variable "creation_token" {
   type        = string
-  description = "A unique file path for the volume. Used when creating mount targets. Default is `null` which means the `name` variable value is used in place."
+  description = "A unique file path for the volume. Used when creating mount targets. This must be 1-80 characters in length, start with a letter and can only contain alphanumeric characters and hyphens."
 
   validation {
-    condition     = var.creation_token == null || can(regex("^[a-zA-Z][a-zA-Z0-9\\-]{0,79}$", var.creation_token))
-    error_message = "The creation token must be specified and be 1-80 characters in length, start with a letter and can only contain alphanumeric and hyphens."
+    condition     = can(regex("^[a-zA-Z][a-zA-Z0-9\\-]{0,79}$", var.creation_token))
+    error_message = "The creation token must be 1-80 characters in length, start with a letter and can only contain alphanumeric characters and hyphens."
   }
 }
 
@@ -358,15 +358,15 @@ variable "unix_permissions" {
   default     = "0770"
   description = <<DESCRIPTION
   UNIX permissions for NFS volume accepted in octal 4 digit format.
-  
+
   First digit selects the set user ID(4), set group ID (2) and sticky (1) attributes.
-  
-  Second digit selects permission for the owner of the file: read (4), write (2) and execute (1). 
-  
-  Third selects permissions for other users in the same group. 
-  
-  The fourth for other users not in the group. 
-  
+
+  Second digit selects permission for the owner of the file: read (4), write (2) and execute (1).
+
+  Third selects permissions for other users in the same group.
+
+  The fourth for other users not in the group.
+
   `0755` - gives read/write/execute permissions to owner and read/execute to group and other users.
 
   For more information, see https://learn.microsoft.com/azure/azure-netapp-files/configure-unix-permissions-change-ownership-mode and https://wikipedia.org/wiki/File-system_permissions#Numeric_notation.
