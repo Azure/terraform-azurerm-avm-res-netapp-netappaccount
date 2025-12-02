@@ -4,6 +4,16 @@ variable "capacity_pool_resource_id" {
   nullable    = false
 }
 
+variable "creation_token" {
+  type        = string
+  description = "A unique file path for the volume. Used when creating mount targets. This must be 1-80 characters in length, start with a letter and can only contain alphanumeric characters and hyphens."
+
+  validation {
+    condition     = can(regex("^[a-zA-Z][a-zA-Z0-9\\-]{0,79}$", var.creation_token))
+    error_message = "The creation token must be 1-80 characters in length, start with a letter and can only contain alphanumeric characters and hyphens."
+  }
+}
+
 variable "location" {
   type        = string
   description = "Azure region where the resource should be deployed."
@@ -89,16 +99,6 @@ variable "coolness_period" {
   validation {
     condition     = var.coolness_period == null ? true : (var.coolness_period >= 2 && var.coolness_period <= 183)
     error_message = "The coolness_period value must be between 2 and 183 or null."
-  }
-}
-
-variable "creation_token" {
-  type        = string
-  description = "A unique file path for the volume. Used when creating mount targets. This must be 1-80 characters in length, start with a letter and can only contain alphanumeric characters and hyphens."
-
-  validation {
-    condition     = can(regex("^[a-zA-Z][a-zA-Z0-9\\-]{0,79}$", var.creation_token))
-    error_message = "The creation token must be 1-80 characters in length, start with a letter and can only contain alphanumeric characters and hyphens."
   }
 }
 

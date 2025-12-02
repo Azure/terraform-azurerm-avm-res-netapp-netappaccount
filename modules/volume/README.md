@@ -38,6 +38,12 @@ Description: (Required) The Azure Resource ID of the Capacity Pool where the vol
 
 Type: `string`
 
+### <a name="input_creation_token"></a> [creation\_token](#input\_creation\_token)
+
+Description: A unique file path for the volume. Used when creating mount targets. This must be 1-80 characters in length, start with a letter and can only contain alphanumeric characters and hyphens.
+
+Type: `string`
+
 ### <a name="input_location"></a> [location](#input\_location)
 
 Description: Azure region where the resource should be deployed.
@@ -113,14 +119,6 @@ Default: `null`
 Description: (Optional) Specifies the number of days after which data that is not accessed by clients will be tiered. Values must be between 2 and 183. Default is `null`.
 
 Type: `number`
-
-Default: `null`
-
-### <a name="input_creation_token"></a> [creation\_token](#input\_creation\_token)
-
-Description: (Optional) A unique file path for the volume. Used when creating mount targets. Default is `null` which means the `name` variable value is used in place.
-
-Type: `string`
 
 Default: `null`
 
@@ -372,13 +370,13 @@ Default: `null`
 
 ### <a name="input_unix_permissions"></a> [unix\_permissions](#input\_unix\_permissions)
 
-Description:   UNIX permissions for NFS volume accepted in octal 4 digit format.  
+Description:   UNIX permissions for NFS volume accepted in octal 4 digit format.
 
-  First digit selects the set user ID(4), set group ID (2) and sticky (1) attributes.  
+  First digit selects the set user ID(4), set group ID (2) and sticky (1) attributes.
 
-  Second digit selects permission for the owner of the file: read (4), write (2) and execute (1).   
+  Second digit selects permission for the owner of the file: read (4), write (2) and execute (1).
 
-  Third selects permissions for other users in the same group.   
+  Third selects permissions for other users in the same group.
 
   The fourth for other users not in the group.
 

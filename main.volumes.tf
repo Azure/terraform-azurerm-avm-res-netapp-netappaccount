@@ -3,6 +3,7 @@ module "volumes" {
   for_each = var.volumes
 
   capacity_pool_resource_id              = module.capacity_pools[each.value.capacity_pool_map_key].resource_id
+  creation_token                         = each.value.creation_token
   location                               = var.location
   name                                   = each.value.name
   subnet_resource_id                     = each.value.subnet_resource_id
@@ -13,7 +14,6 @@ module "volumes" {
   cool_access                            = each.value.cool_access
   cool_access_retrieval_policy           = each.value.cool_access_retrieval_policy
   coolness_period                        = each.value.coolness_period
-  creation_token                         = each.value.creation_token
   default_group_quota_in_kibs            = each.value.default_group_quota_in_kibs
   default_quota_enabled                  = each.value.default_quota_enabled
   default_user_quota_in_kibs             = each.value.default_user_quota_in_kibs
