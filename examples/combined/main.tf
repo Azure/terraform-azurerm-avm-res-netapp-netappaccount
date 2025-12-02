@@ -20,10 +20,10 @@ provider "azapi" {
 # This allows us to randomize the region for the resource group.
 module "regions" {
   source  = "Azure/avm-utl-regions/azurerm"
-  version = "~> 0.3"
+  version = "0.9.2"
 
-  availability_zones_filter = true
-  geography_group_filter    = "Europe"
+  geography_group_filter = "Europe"
+  has_availability_zones = true
 }
 
 # This allows us to randomize the region for the resource group.
@@ -201,7 +201,8 @@ module "test" {
   }
   volumes = {
     "volume-1" = {
-      name = "volume-1"
+      name           = "volume-1"
+      creation_token = "volume-1"
       tags = {
         environment = "test"
       }
@@ -229,7 +230,8 @@ module "test" {
       }
     }
     "zone-volume-1" = {
-      name = "zone-volume-1"
+      name           = "zone-volume-1"
+      creation_token = "zone-volume-1"
       tags = {
         environment = "test"
       }

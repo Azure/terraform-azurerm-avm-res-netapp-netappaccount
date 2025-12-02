@@ -3,6 +3,7 @@ module "volumes" {
   for_each = var.volumes
 
   capacity_pool_resource_id              = module.capacity_pools[each.value.capacity_pool_map_key].resource_id
+  creation_token                         = each.value.creation_token
   location                               = var.location
   name                                   = each.value.name
   subnet_resource_id                     = each.value.subnet_resource_id

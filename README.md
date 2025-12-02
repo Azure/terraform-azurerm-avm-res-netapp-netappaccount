@@ -423,7 +423,7 @@ The map key is deliberately arbitrary to avoid issues where map keys maybe unkno
 - `cool_access` - (Optional) Specifies whether the volume is cool access enabled. Default is `false`.
 - `cool_access_retrieval_policy` - (Optional) determines the data retrieval behavior from the cool tier to standard storage based on the read pattern for cool access enabled volumes. Possible values are `default`, `never`, `onread` or `null`. Default is `null`.
 - `coolness_period` - (Optional) Specifies the number of days after which data that is not accessed by clients will be tiered. Values must be between 2 and 183. Default is `null`.
-- `creation_token` - (Optional) A unique file path for the volume. Used when creating mount targets. Default is `null` which means the `name` variable value is used in place.
+- `creation_token` - A unique file path for the volume. Used when creating mount targets. This must be 1-80 characters in length, start with a letter and can only contain alphanumeric characters and hyphens.
 - `default_quota_enabled` - (Optional) Specifies if default quota is enabled for the volume. Default is `false`.
 - `default_group_quota_in_kibs` - (Optional) Default group quota for volume in KiBs. If `default_quota_enabled` is set, the minimum value of 4 KiBs applies. Default is `null`.
 - `default_user_quota_in_kibs` - (Optional) Default user quota for volume in KiBs. If `default_quota_enabled` is set, the minimum value of 4 KiBs applies. Default is `null`.
@@ -479,11 +479,11 @@ map(object({
     avs_data_store               = optional(bool)
     backup_policy_map_key        = optional(string)
     backup_vault_map_key         = optional(string)
-    backup_policy_enforced       = optional(bool)
+    backup_policy_enforced       = optional(bool, false)
     cool_access                  = optional(bool, false)
     cool_access_retrieval_policy = optional(string)
     coolness_period              = optional(number)
-    creation_token               = optional(string)
+    creation_token               = string
     default_quota_enabled        = optional(bool, false)
     default_group_quota_in_kibs  = optional(number, 0)
     default_user_quota_in_kibs   = optional(number, 0)
