@@ -10,7 +10,7 @@ resource "azapi_resource" "anf_capacity_pool_volume" {
       coolAccess                        = var.cool_access
       coolAccessRetrievalPolicy         = var.cool_access_retrieval_policy
       coolnessPeriod                    = var.coolness_period
-      creationToken                     = local.creation_token
+      creationToken                     = var.creation_token
       defaultGroupQuotaInKiBs           = var.default_group_quota_in_kibs
       defaultUserQuotaInKiBs            = var.default_user_quota_in_kibs
       deleteBaseSnapshot                = var.delete_base_snapshot
