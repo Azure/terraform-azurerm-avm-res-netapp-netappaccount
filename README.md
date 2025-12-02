@@ -479,7 +479,7 @@ map(object({
     avs_data_store               = optional(bool)
     backup_policy_map_key        = optional(string)
     backup_vault_map_key         = optional(string)
-    backup_policy_enforced       = optional(bool)
+    backup_policy_enforced       = optional(bool, false)
     cool_access                  = optional(bool, false)
     cool_access_retrieval_policy = optional(string)
     coolness_period              = optional(number)
