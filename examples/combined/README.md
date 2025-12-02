@@ -237,7 +237,8 @@ module "test" {
       }
     }
     "zone-volume-1" = {
-      name = "zone-volume-1"
+      name           = "zone-volume-1"
+      creation_token = "zone-volume-1"
       tags = {
         environment = "test"
       }
