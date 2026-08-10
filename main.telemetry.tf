@@ -23,6 +23,7 @@ resource "modtm_telemetry" "telemetry" {
     random_id       = one(random_uuid.telemetry).result
   }, { location = local.main_location })
 }
+
 locals {
   avm_azapi_headers = !var.enable_telemetry ? {} : (local.fork_avm ? {
     fork_avm  = "true"
@@ -52,7 +53,7 @@ locals {
   # tflint-ignore: terraform_unused_declarations
   avm_azapi_header = join(" ", [for k, v in local.avm_azapi_headers : "${k}=${v}"])
 }
+
 locals {
   main_location = var.location
 }
-
