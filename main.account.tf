@@ -1,5 +1,3 @@
-
-
 resource "azapi_resource" "anf_account" {
   location  = var.location
   name      = var.name
