@@ -12,9 +12,9 @@ terraform {
     }
   }
 }
+
 provider "azapi" {
 }
-
 
 ## Section to provide a random Azure region for the resource group
 # This allows us to randomize the region for the resource group.
@@ -40,6 +40,7 @@ resource "random_shuffle" "region" {
   input        = module.regions.valid_region_names
   result_count = 1
 }
+
 ## End of section to provide a random Azure region for the resource group
 
 # This ensures we have unique CAF compliant names for our resources.
@@ -66,9 +67,3 @@ module "test" {
   name                = "anf-account-example-default-${random_pet.name.id}"
   resource_group_name = azapi_resource.rsg.name
 }
-
-
-
-
-
-
