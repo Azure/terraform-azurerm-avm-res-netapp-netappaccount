@@ -22,6 +22,7 @@ module "regions" {
   source  = "Azure/avm-utl-regions/azurerm"
   version = "0.9.2"
 
+  enable_telemetry       = false
   geography_group_filter = "Europe"
   has_availability_zones = true
 }
@@ -152,6 +153,7 @@ module "test" {
       }
     }
   }
+  enable_telemetry = false
   snapshot_policies = {
     "snap-pol-1" = {
       name = "snap-pol-1"
