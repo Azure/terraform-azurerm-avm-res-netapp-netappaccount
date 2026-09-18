@@ -29,7 +29,7 @@ module "regions" {
   source  = "Azure/avm-utl-regions/azurerm"
   version = "0.9.2"
 
-  enable_telemetry       = false
+  enable_telemetry       = var.enable_telemetry
   geography_group_filter = "Europe"
   has_availability_zones = true
 }
@@ -160,7 +160,7 @@ module "test" {
       }
     }
   }
-  enable_telemetry = false
+  enable_telemetry = var.enable_telemetry
   snapshot_policies = {
     "snap-pol-1" = {
       name = "snap-pol-1"
@@ -303,7 +303,17 @@ No required inputs.
 
 ## Optional Inputs
 
-No optional inputs.
+The following input variables are optional (have default values):
+
+### <a name="input_enable_telemetry"></a> [enable\_telemetry](#input\_enable\_telemetry)
+
+Description: This variable controls whether or not telemetry is enabled for the module.  
+For more information see <https://aka.ms/avm/telemetryinfo>.  
+If it is set to false, then no telemetry will be collected.
+
+Type: `bool`
+
+Default: `false`
 
 ## Outputs
 
