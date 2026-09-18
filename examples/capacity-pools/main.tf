@@ -22,7 +22,7 @@ module "regions" {
   source  = "Azure/avm-utl-regions/azurerm"
   version = "0.9.2"
 
-  enable_telemetry       = false
+  enable_telemetry       = var.enable_telemetry
   geography_group_filter = "Europe"
   has_availability_zones = true
 }
@@ -81,5 +81,5 @@ module "test" {
       cool_access   = true
     }
   }
-  enable_telemetry = false
+  enable_telemetry = var.enable_telemetry
 }

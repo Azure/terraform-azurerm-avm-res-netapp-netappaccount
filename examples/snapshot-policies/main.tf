@@ -22,7 +22,7 @@ module "regions" {
   source  = "Azure/avm-utl-regions/azurerm"
   version = "0.9.2"
 
-  enable_telemetry       = false
+  enable_telemetry       = var.enable_telemetry
   geography_group_filter = "Europe"
   has_availability_zones = true
 }
@@ -67,7 +67,7 @@ module "test" {
   location            = azapi_resource.rsg.location
   name                = "anf-account-example-backup-vlt-${random_pet.name.id}"
   resource_group_name = azapi_resource.rsg.name
-  enable_telemetry    = false
+  enable_telemetry    = var.enable_telemetry
   snapshot_policies = {
     "snap-pol-1" = {
       name = "snap-pol-1"
