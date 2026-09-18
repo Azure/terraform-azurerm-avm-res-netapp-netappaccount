@@ -1,0 +1,10 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Azure/azure-verified-modules-tools/main/src/Avm.Authoring/Resources/Schemas/v1/avm-module-metadata.schema.json",
+  "moduleDisplayName": "Azure NetApp File",
+  "moduleDescription": "AVM Resource Module for Azure NetApp File",
+  "canonicalType": "Microsoft.NetApp/netAppAccounts",
+  "owners": [
+    "jtracey93"
+  ],
+  "telemetryIdPrefix": "46d3xtrf.res.1c385b9"
+}
