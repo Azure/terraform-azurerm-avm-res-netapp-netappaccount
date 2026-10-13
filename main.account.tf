@@ -34,13 +34,13 @@ resource "azapi_resource" "anf_account" {
 
       encryption = var.customer_managed_key != null ? {
         identity = {
-          userAssignedIdentity = var.customer_managed_key.user_assigned_identity.resource_id
+          userAssignedIdentity = local.cmk_identity_resource_id
         }
-        keySource = var.customer_managed_key.key_source
+        keySource = "Microsoft.KeyVault"
         keyVaultProperties = {
           keyVaultUri        = local.cmk_key_vault_uri
           keyVaultResourceId = var.customer_managed_key.key_vault_resource_id
-          keyVaultKeyName    = var.customer_managed_key.key_name
+          keyName            = var.customer_managed_key.key_name
         }
         } : {
         identity           = null
@@ -61,6 +61,21 @@ resource "azapi_resource" "anf_account" {
     content {
       type         = identity.value.type
       identity_ids = identity.value.user_assigned_resource_ids
+    }
+  }
+
+  lifecycle {
+    precondition {
+      condition     = var.customer_managed_key == null || local.cmk_identity_resource_id != null
+      error_message = "`customer_managed_key.user_assigned_identity.resource_id` is required for NetApp customer-managed encryption."
+    }
+    precondition {
+      condition     = local.cmk_identity_resource_id == null || contains(var.managed_identities.user_assigned_resource_ids, local.cmk_identity_resource_id)
+      error_message = "The encryption identity must also be assigned through `managed_identities.user_assigned_resource_ids`."
+    }
+    precondition {
+      condition     = var.customer_managed_key == null ? true : var.customer_managed_key.key_version == null
+      error_message = "NetApp accepts a key name rather than a pinned version; omit `customer_managed_key.key_version`."
     }
   }
 }

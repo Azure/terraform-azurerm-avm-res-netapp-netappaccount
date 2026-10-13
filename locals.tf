@@ -1,5 +1,6 @@
 locals {
-  cmk_key_vault_uri = var.customer_managed_key != null ? concat("https://", split("/", var.customer_managed_key.key_vault_resource_id)[8], ".vault.azure.net") : null
+  cmk_key_vault_uri        = var.customer_managed_key == null ? null : data.azapi_resource.customer_managed_key_vault[0].output.properties.vaultUri
+  cmk_identity_resource_id = var.customer_managed_key == null ? null : try(var.customer_managed_key.user_assigned_identity.resource_id, null)
   role_definition_id_principal_and_definition_uuidv5 = var.role_assignments != null ? {
     for k, v in var.role_assignments : k => uuidv5(v.principal_id, v.role_definition_id)
   } : {}

@@ -4,6 +4,12 @@
 
 This repo contains the AVM Resource Module for creating an Azure NetApp Files Account & associated resources.
 
+Customer-managed encryption uses `Microsoft.KeyVault` automatically; omit the former
+`customer_managed_key.key_source` attribute. Set `customer_managed_key = null` for
+NetApp-managed encryption. The vault URI is read from the vault to support sovereign
+clouds. Supply and assign the encryption identity, and omit `key_version`: NetApp
+accepts only a key name.
+
 <!-- markdownlint-disable MD033 -->
 ## Requirements
 
@@ -28,6 +34,7 @@ The following resources are used by this module:
 - [random_uuid.telemetry](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/uuid) (resource)
 - [azapi_client_config.telemetry](https://registry.terraform.io/providers/Azure/azapi/latest/docs/data-sources/client_config) (data source)
 - [azapi_client_config.this](https://registry.terraform.io/providers/Azure/azapi/latest/docs/data-sources/client_config) (data source)
+- [azapi_resource.customer_managed_key_vault](https://registry.terraform.io/providers/Azure/azapi/latest/docs/data-sources/resource) (data source)
 - [modtm_module_source.telemetry](https://registry.terraform.io/providers/azure/modtm/latest/docs/data-sources/module_source) (data source)
 
 <!-- markdownlint-disable MD013 -->
@@ -215,13 +222,12 @@ Default: `{}`
 
 ### <a name="input_customer_managed_key"></a> [customer\_managed\_key](#input\_customer\_managed\_key)
 
-Description: A map describing customer-managed keys to associate with the resource. This includes the following properties:
+Description: Customer-managed encryption for the NetApp account. The deployment identity must be able to read the Key Vault.
 - `key_vault_resource_id` - The resource ID of the Key Vault where the key is stored.
 - `key_name` - The name of the key.
-- `key_version` - (Optional) The version of the key. If not specified, the latest version is used.
-- `key_source` - (Optional) The source of the key. Possible values are `Microsoft.NetApp` and `Microsoft.KeyVault`. Default is `Microsoft.NetApp`.
-- `user_assigned_identity` - (Optional) An object representing a user-assigned identity with the following properties:
-  - `resource_id` - The resource ID of the user-assigned identity.
+- `key_version` - Must be omitted: the NetApp API accepts a key name, not a pinned key version.
+- `user_assigned_identity` - The encryption identity, required when customer-managed encryption is enabled.
+  - `resource_id` - The identity resource ID. Also include it in `managed_identities.user_assigned_resource_ids`.
 
 Type:
 
@@ -229,11 +235,10 @@ Type:
 object({
     key_vault_resource_id = string
     key_name              = string
-    key_version           = optional(string)
-    key_source            = optional(string)
+    key_version           = optional(string, null)
     user_assigned_identity = optional(object({
       resource_id = string
-    }))
+    }), null)
   })
 ```
 
