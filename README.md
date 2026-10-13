@@ -4,6 +4,21 @@
 
 This repo contains the AVM Resource Module for creating an Azure NetApp Files Account & associated resources.
 
+Customer-managed encryption uses `Microsoft.KeyVault` automatically; omit the former
+`customer_managed_key.key_source` attribute. Set `customer_managed_key = null` for
+NetApp-managed encryption. The vault URI is read from the vault to support sovereign
+clouds. Supply and assign the encryption identity, and omit `key_version`: NetApp
+accepts only a key name.
+
+Rename `role_assignments[*].role_definition_id` to `role_definition_id_or_name`.
+Keep existing map keys, principal IDs and role GUIDs to preserve assignment IDs.
+Omitting `name` retains this module's deterministic assignment UUIDs; an explicit
+`name` overrides them. GUIDs and resource IDs need no role-definition lookup.
+For role names, set `role_assignment_definition_lookup_enabled = true` and grant
+the deployment identity role-definition read permission at subscription scope.
+AzAPI performs no directory lookup, so `skip_service_principal_aad_check` has no
+additional effect.
+
 <!-- markdownlint-disable MD033 -->
 ## Requirements
 
@@ -28,6 +43,8 @@ The following resources are used by this module:
 - [random_uuid.telemetry](https://registry.terraform.io/providers/hashicorp/random/latest/docs/resources/uuid) (resource)
 - [azapi_client_config.telemetry](https://registry.terraform.io/providers/Azure/azapi/latest/docs/data-sources/client_config) (data source)
 - [azapi_client_config.this](https://registry.terraform.io/providers/Azure/azapi/latest/docs/data-sources/client_config) (data source)
+- [azapi_resource.customer_managed_key_vault](https://registry.terraform.io/providers/Azure/azapi/latest/docs/data-sources/resource) (data source)
+- [azapi_resource_list.role_definitions](https://registry.terraform.io/providers/Azure/azapi/latest/docs/data-sources/resource_list) (data source)
 - [modtm_module_source.telemetry](https://registry.terraform.io/providers/azure/modtm/latest/docs/data-sources/module_source) (data source)
 
 <!-- markdownlint-disable MD013 -->
@@ -215,13 +232,12 @@ Default: `{}`
 
 ### <a name="input_customer_managed_key"></a> [customer\_managed\_key](#input\_customer\_managed\_key)
 
-Description: A map describing customer-managed keys to associate with the resource. This includes the following properties:
+Description: Customer-managed encryption for the NetApp account. The deployment identity must be able to read the Key Vault.
 - `key_vault_resource_id` - The resource ID of the Key Vault where the key is stored.
 - `key_name` - The name of the key.
-- `key_version` - (Optional) The version of the key. If not specified, the latest version is used.
-- `key_source` - (Optional) The source of the key. Possible values are `Microsoft.NetApp` and `Microsoft.KeyVault`. Default is `Microsoft.NetApp`.
-- `user_assigned_identity` - (Optional) An object representing a user-assigned identity with the following properties:
-  - `resource_id` - The resource ID of the user-assigned identity.
+- `key_version` - Must be omitted: the NetApp API accepts a key name, not a pinned key version.
+- `user_assigned_identity` - The encryption identity, required when customer-managed encryption is enabled.
+  - `resource_id` - The identity resource ID. Also include it in `managed_identities.user_assigned_resource_ids`.
 
 Type:
 
@@ -229,11 +245,10 @@ Type:
 object({
     key_vault_resource_id = string
     key_name              = string
-    key_version           = optional(string)
-    key_source            = optional(string)
+    key_version           = optional(string, null)
     user_assigned_identity = optional(object({
       resource_id = string
-    }))
+    }), null)
   })
 ```
 
@@ -293,29 +308,43 @@ object({
 
 Default: `{}`
 
+### <a name="input_role_assignment_definition_lookup_enabled"></a> [role\_assignment\_definition\_lookup\_enabled](#input\_role\_assignment\_definition\_lookup\_enabled)
+
+Description: Enable subscription-scoped role-definition lookup when supplying role names. Requires role-definition read permission. Leave disabled for role GUIDs or resource IDs.
+
+Type: `bool`
+
+Default: `false`
+
 ### <a name="input_role_assignments"></a> [role\_assignments](#input\_role\_assignments)
 
-Description: A map of role assignments to create on this resource. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
+Description: A map of role assignments to create on the NetApp account. The map key is deliberately arbitrary to avoid issues where map keys maybe unknown at plan time.
 
-- `role_definition_id` - The ID of the role definition to assign to the principal. e.g. `acdd72a7-3385-48ef-bd42-f606fba81ae7` (Reader).
+- `name` - (Optional) The name of the role assignment. If not set, a random UUID will be generated. Changing this forces the creation of a new resource.
+- `role_definition_id_or_name` - The ID or name of the role definition to assign to the principal.
 - `principal_id` - The ID of the principal to assign the role to.
-- `principal_type` - The type of the principal. Possible values are `User`, `Group`, `ServicePrincipal`, `Device`, and `ForeignGroup`.
 - `description` - (Optional) The description of the role assignment.
+- `skip_service_principal_aad_check` - (Optional) If set to true, skips the Azure Active Directory check for the service principal in the tenant. Defaults to false.
 - `condition` - (Optional) The condition which will be used to scope the role assignment.
-- `condition_version` - (Optional) The version of the condition syntax. Valid values are '2.0'.
-- `delegated_managed_identity_resource_id` - (Optional) The resource ID of the delegated managed identity to use for the role assignment.
+- `condition_version` - (Optional) The version of the condition syntax. Leave as `null` if you are not using a condition, if you are then valid values are '2.0'.
+- `delegated_managed_identity_resource_id` - (Optional) The delegated Azure Resource Id which contains a Managed Identity. Changing this forces a new resource to be created. This field is only used in cross-tenant scenario.
+- `principal_type` - (Optional) The type of the `principal_id`. Possible values are `User`, `Group` and `ServicePrincipal`. It is necessary to explicitly set this attribute when creating role assignments if the principal creating the assignment is constrained by ABAC rules that filters on the PrincipalType attribute.
+
+> Note: only set `skip_service_principal_aad_check` to true if you are assigning a role to a service principal.
 
 Type:
 
 ```hcl
 map(object({
-    role_definition_id                     = string
+    name                                   = optional(string, null)
+    role_definition_id_or_name             = string
     principal_id                           = string
-    principal_type                         = string
-    description                            = optional(string)
-    condition                              = optional(string)
-    condition_version                      = optional(string)
-    delegated_managed_identity_resource_id = optional(string)
+    description                            = optional(string, null)
+    skip_service_principal_aad_check       = optional(bool, false)
+    condition                              = optional(string, null)
+    condition_version                      = optional(string, null)
+    delegated_managed_identity_resource_id = optional(string, null)
+    principal_type                         = optional(string, null)
   }))
 ```
 
