@@ -37,9 +37,13 @@ mock_provider "azapi" {
   }
 }
 
-mock_provider "modtm" {}
-
-mock_provider "random" {}
+mock_provider "azapi" {
+  mock_data "azapi_client_config" {
+    defaults = {
+      subscription_resource_id = "/subscriptions/00000000-0000-0000-0000-000000000000"
+    }
+  }
+}
 
 variables {
   name                = "netapp-test"
@@ -51,9 +55,9 @@ variables {
 run "netapp_managed_encryption" {
   command = apply
   providers = {
-    azapi  = azapi.mocked
-    modtm  = modtm
-    random = random
+    azapi = azapi.mocked
+
+
   }
 
   assert {
@@ -69,7 +73,7 @@ run "netapp_managed_encryption" {
     error_message = "Default configuration must not read role definitions."
   }
   assert {
-    condition     = output.resource_id == azapi_resource.anf_account.id && length(modtm_telemetry.telemetry) == 0
+    condition     = output.resource_id == azapi_resource.anf_account.id && length(azapi_resource.telemetry) == 0
     error_message = "The account output and telemetry opt-out must remain unchanged."
   }
 }
@@ -77,9 +81,9 @@ run "netapp_managed_encryption" {
 run "customer_managed_encryption" {
   command = apply
   providers = {
-    azapi  = azapi.mocked
-    modtm  = modtm
-    random = random
+    azapi = azapi.mocked
+
+
   }
   variables {
     customer_managed_key = {
@@ -115,9 +119,9 @@ run "customer_managed_encryption" {
 run "requires_encryption_identity" {
   command = plan
   providers = {
-    azapi  = azapi.mocked
-    modtm  = modtm
-    random = random
+    azapi = azapi.mocked
+
+
   }
   variables {
     customer_managed_key = {
@@ -131,9 +135,9 @@ run "requires_encryption_identity" {
 run "requires_assigned_encryption_identity" {
   command = plan
   providers = {
-    azapi  = azapi.mocked
-    modtm  = modtm
-    random = random
+    azapi = azapi.mocked
+
+
   }
   variables {
     customer_managed_key = {
@@ -150,9 +154,9 @@ run "requires_assigned_encryption_identity" {
 run "rejects_unsupported_key_version" {
   command = plan
   providers = {
-    azapi  = azapi.mocked
-    modtm  = modtm
-    random = random
+    azapi = azapi.mocked
+
+
   }
   variables {
     customer_managed_key = {
@@ -173,9 +177,9 @@ run "rejects_unsupported_key_version" {
 run "preserves_role_assignment_address_and_name" {
   command = apply
   providers = {
-    azapi  = azapi.mocked
-    modtm  = modtm
-    random = random
+    azapi = azapi.mocked
+
+
   }
   variables {
     role_assignments = {
@@ -204,9 +208,9 @@ run "preserves_role_assignment_address_and_name" {
 run "resolves_role_name" {
   command = apply
   providers = {
-    azapi  = azapi.mocked
-    modtm  = modtm
-    random = random
+    azapi = azapi.mocked
+
+
   }
   variables {
     role_assignment_definition_lookup_enabled = true
@@ -235,9 +239,9 @@ run "resolves_role_name" {
 run "accepts_role_definition_resource_id" {
   command = apply
   providers = {
-    azapi  = azapi.mocked
-    modtm  = modtm
-    random = random
+    azapi = azapi.mocked
+
+
   }
   variables {
     role_assignments = {
@@ -261,9 +265,9 @@ run "accepts_role_definition_resource_id" {
 run "honors_role_assignment_overrides" {
   command = apply
   providers = {
-    azapi  = azapi.mocked
-    modtm  = modtm
-    random = random
+    azapi = azapi.mocked
+
+
   }
   variables {
     role_assignment_definition_lookup_enabled = true
@@ -301,9 +305,9 @@ run "honors_role_assignment_overrides" {
 run "rejects_unresolved_role_name" {
   command = plan
   providers = {
-    azapi  = azapi.mocked
-    modtm  = modtm
-    random = random
+    azapi = azapi.mocked
+
+
   }
   variables {
     role_assignment_definition_lookup_enabled = true
@@ -320,9 +324,9 @@ run "rejects_unresolved_role_name" {
 run "rejects_invalid_delegated_identity" {
   command = plan
   providers = {
-    azapi  = azapi.mocked
-    modtm  = modtm
-    random = random
+    azapi = azapi.mocked
+
+
   }
   variables {
     role_assignment_definition_lookup_enabled = true
@@ -340,9 +344,9 @@ run "rejects_invalid_delegated_identity" {
 run "preserves_uppercase_role_guid" {
   command = apply
   providers = {
-    azapi  = azapi.mocked
-    modtm  = modtm
-    random = random
+    azapi = azapi.mocked
+
+
   }
   variables {
     role_assignments = {
@@ -363,9 +367,9 @@ run "preserves_uppercase_role_guid" {
 run "requires_lookup_for_role_names" {
   command = plan
   providers = {
-    azapi  = azapi.mocked
-    modtm  = modtm
-    random = random
+    azapi = azapi.mocked
+
+
   }
   variables {
     role_assignments = {
