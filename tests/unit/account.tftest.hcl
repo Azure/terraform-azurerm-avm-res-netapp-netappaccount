@@ -46,10 +46,11 @@ mock_provider "azapi" {
 }
 
 variables {
-  name                = "netapp-test"
-  location            = "usgovvirginia"
-  resource_group_name = "netapp-test"
-  enable_telemetry    = false
+  name                 = "netapp-test"
+  location             = "usgovvirginia"
+  resource_group_name  = "netapp-test"
+  enable_telemetry     = false
+  customer_managed_key = null
 }
 
 run "netapp_managed_encryption" {
@@ -114,6 +115,46 @@ run "customer_managed_encryption" {
     condition     = azapi_resource.anf_account.body.properties.encryption.identity.userAssignedIdentity == var.customer_managed_key.user_assigned_identity.resource_id
     error_message = "The configured encryption identity must reach the account body."
   }
+}
+
+run "rejects_invalid_key_vault_resource_id" {
+  command = plan
+  providers = {
+    azapi = azapi.mocked
+  }
+  variables {
+    customer_managed_key = {
+      key_vault_resource_id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/netapp-test/providers/Microsoft.ManagedIdentity/userAssignedIdentities/netapp-test"
+      key_name              = "netapp-key"
+      user_assigned_identity = {
+        resource_id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/netapp-test/providers/Microsoft.ManagedIdentity/userAssignedIdentities/netapp-test"
+      }
+    }
+    managed_identities = {
+      user_assigned_resource_ids = ["/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/netapp-test/providers/Microsoft.ManagedIdentity/userAssignedIdentities/netapp-test"]
+    }
+  }
+  expect_failures = [var.customer_managed_key]
+}
+
+run "rejects_invalid_encryption_identity_resource_id" {
+  command = plan
+  providers = {
+    azapi = azapi.mocked
+  }
+  variables {
+    customer_managed_key = {
+      key_vault_resource_id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/netapp-test/providers/Microsoft.KeyVault/vaults/netapp-test"
+      key_name              = "netapp-key"
+      user_assigned_identity = {
+        resource_id = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/netapp-test/providers/Microsoft.KeyVault/vaults/netapp-test"
+      }
+    }
+    managed_identities = {
+      user_assigned_resource_ids = ["/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/netapp-test/providers/Microsoft.KeyVault/vaults/netapp-test"]
+    }
+  }
+  expect_failures = [var.customer_managed_key]
 }
 
 run "requires_encryption_identity" {
