@@ -70,7 +70,7 @@ resource "azapi_resource" "anf_account" {
       error_message = "`customer_managed_key.user_assigned_identity.resource_id` is required for NetApp customer-managed encryption."
     }
     precondition {
-      condition     = local.cmk_identity_resource_id == null || contains(var.managed_identities.user_assigned_resource_ids, local.cmk_identity_resource_id)
+      condition     = local.cmk_identity_resource_id == null ? true : contains(var.managed_identities.user_assigned_resource_ids, local.cmk_identity_resource_id)
       error_message = "The encryption identity must also be assigned through `managed_identities.user_assigned_resource_ids`."
     }
     precondition {
